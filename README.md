@@ -1,4 +1,4 @@
-# Portfolio v8
+# Beta Portfolio v8
 - Mouse-position gradient on "Product Designer"
 - Airy About (Apple-like), minimal cards
 - FR/EN bilingual with tiny toggle (top-right)

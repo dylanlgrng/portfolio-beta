@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { HashRouter, Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, Plus, Minus, Mail, Linkedin, Phone, ArrowUpRight, Sun, Moon, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Minus, Mail, Linkedin, Phone, ArrowUpRight, Sun, Moon, Info } from "lucide-react";
 
 const EMAIL_B64 = "bGFncmFuZ2VkeWxhbkBnbWFpbC5jb20=";
 
@@ -412,11 +412,33 @@ function Extras({ show, items }){
 }
 
 function ProjectPage({ lang }) {
-  var t = CONTENT[lang];
-  var navigate = useNavigate();
-  var params = useParams();
-  var id = params.id;
-  var project = (t.projects || []).find(p => p.id === id);
+  const t = CONTENT[lang];
+  const navigate = useNavigate();
+  const { id } = useParams();
+
+  const list = (t.projects || []);
+  const projectIndex = Math.max(0, list.findIndex(p => p.id === id));
+  const project = list[projectIndex];
+  const prev = projectIndex > 0 ? list[projectIndex - 1] : null;
+  const next = projectIndex < list.length - 1 ? list[projectIndex + 1] : null;
+
+  const LABELS = {
+    fr: {
+      back: t.labels.back, toc: "Sommaire",
+      start: "Comment tout a commencé", problem: "Le problème",
+      activities: "Activités clés", process: "Comment on l’a fait",
+      impact: "L’impact", previous: "Étude précédente",
+      next: "Étude suivante", toTop: "Haut de page"
+    },
+    en: {
+      back: t.labels.back, toc: "Contents",
+      start: "How it all started", problem: "The problem",
+      activities: "Key activities", process: "How we made it happen",
+      impact: "Impact", previous: "Previous case study",
+      next: "Next case study", toTop: "Back to top"
+    }
+  }[lang];
+
   if (!project) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16">
@@ -427,16 +449,177 @@ function ProjectPage({ lang }) {
       </div>
     );
   }
+
+  const cs = project.cs || null;
+  const toc = cs ? [
+    cs.start && { id: "start", label: LABELS.start },
+    cs.problem && { id: "problem", label: LABELS.problem },
+    Array.isArray(cs.activities) && cs.activities.length && { id: "activities", label: LABELS.activities },
+    Array.isArray(cs.process) && cs.process.length && { id: "process", label: LABELS.process },
+    cs.impact && { id: "impact", label: LABELS.impact },
+  ].filter(Boolean) : [];
+
+  const [active, setActive] = React.useState(toc.length ? toc[0].id : null);
+
+  React.useEffect(() => {
+    if (!toc.length) return;
+    const ids = toc.map(s => s.id);
+    const els = ids.map(id => document.getElementById(id)).filter(Boolean);
+    if (!els.length) return;
+
+    const io = new IntersectionObserver((entries) => {
+      const visible = entries.filter(e => e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);
+      if (visible[0]) setActive(visible[0].target.id);
+    }, { root: null, rootMargin: "-30% 0px -60% 0px", threshold: [0.1, 0.25, 0.5, 0.75] });
+
+    els.forEach(el => io.observe(el));
+    return () => io.disconnect();
+  }, [id, lang, toc.length]);
+
+  function goTo(anchorId) {
+    const el = document.getElementById(anchorId);
+    if (!el) return;
+    const top = window.scrollY + el.getBoundingClientRect().top - 96;
+    window.scrollTo({ top, behavior: 'smooth' });
+  }
+
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-16" id="top">
       <button onClick={() => navigate(-1)} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
         <ChevronLeft size={16} /> {t.labels.back}
       </button>
-      <h1 className="text-3xl font-semibold tracking-tight">{project.title}</h1>
-      <p className="mt-2 text-black/60 dark:text-white/60">{project.summary || ""}</p>
-      <img src={project.image} alt="aperçu" className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover ring-1 ring-black/10 dark:ring-white/10" />
-      <div className="prose prose-neutral dark:prose-invert max-w-none mt-6">
-        <p>{project.description || ""}</p>
+
+      <div className="grid grid-cols-12 gap-8">
+        {/* TOC mobile */}
+        {toc.length ? (
+          <div className="col-span-12 lg:hidden">
+            <details className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 ring-1 ring-black/5 dark:ring-white/5">
+              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium">{LABELS.toc}</summary>
+              <nav className="px-2 py-2">
+                <ul className="space-y-1">
+                  {toc.map(item => (
+                    <li key={item.id}>
+                      <button
+                        onClick={() => goTo(item.id)}
+                        className={"w-full text-left rounded-md px-3 py-2 text-sm transition " + (active === item.id ? "bg-black/5 dark:bg-white/10 font-medium" : "opacity-80 hover:opacity-100")}
+                      >
+                        {item.label}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            </details>
+          </div>
+        ) : null}
+
+        {/* TOC desktop */}
+        {toc.length ? (
+          <aside className="hidden lg:col-span-3 lg:block">
+            <nav className="sticky top-24">
+              <div className="mb-2 text-xs uppercase tracking-wide opacity-60">{LABELS.toc}</div>
+              <ul className="space-y-1">
+                {toc.map(item => (
+                  <li key={item.id}>
+                    <button
+                      onClick={() => goTo(item.id)}
+                      className={"w-full text-left rounded-md px-3 py-2 text-sm transition " + (active === item.id ? "bg-black/5 dark:bg-white/10 font-medium" : "opacity-80 hover:opacity-100")}
+                      aria-current={active === item.id ? "true" : "false"}
+                    >
+                      {item.label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </aside>
+        ) : <div className="hidden lg:block lg:col-span-3" />}
+
+        {/* Contenu */}
+        <article className="col-span-12 lg:col-span-9">
+          <header className="space-y-2">
+            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">{project.title}</h1>
+            {project.summary ? <p className="text-black/60 dark:text-white/60">{project.summary}</p> : null}
+          </header>
+
+          {project.image ? (
+            <div className="mt-8 overflow-hidden rounded-2xl ring-1 ring-black/10 dark:ring-white/10">
+              <img src={project.image} alt="" className="w-full aspect-[16/9] object-cover" />
+            </div>
+          ) : null}
+
+          {/* Fallback si pas de "cs" */}
+          {!cs ? (
+            <div className="prose prose-neutral dark:prose-invert max-w-none mt-8">
+              <p>{project.description || ""}</p>
+            </div>
+          ) : (
+            <div className="mt-10 space-y-12">
+              {cs.start ? (
+                <section id="start" className="scroll-mt-28">
+                  <h2 className="text-xl sm:text-2xl font-semibold">{LABELS.start}</h2>
+                  <p className="mt-3 text-[1.02rem] leading-relaxed text-black/80 dark:text-white/80">{cs.start}</p>
+                </section>
+              ) : null}
+
+              {cs.problem ? (
+                <section id="problem" className="scroll-mt-28">
+                  <h2 className="text-xl sm:text-2xl font-semibold">{LABELS.problem}</h2>
+                  <p className="mt-3 text-[1.02rem] leading-relaxed text-black/80 dark:text-white/80">{cs.problem}</p>
+
+                  {Array.isArray(cs.activities) && cs.activities.length ? (
+                    <div className="mt-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 px-4 sm:px-5 py-4 ring-1 ring-black/5 dark:ring-white/5">
+                      <div className="text-sm font-medium mb-2">{LABELS.activities}</div>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {cs.activities.map((a, i) => (
+                          <li key={i} className="rounded-lg border border-black/10 dark:border-white/10 px-3 py-2 text-sm">{a}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                </section>
+              ) : null}
+
+              {Array.isArray(cs.process) && cs.process.length ? (
+                <section id="process" className="scroll-mt-28">
+                  <h2 className="text-xl sm:text-2xl font-semibold">{LABELS.process}</h2>
+                  <ol className="mt-4 space-y-3">
+                    {cs.process.map((step, i) => (
+                      <li key={i} className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900/60 px-4 py-3 text-sm ring-1 ring-black/5 dark:ring-white/5">
+                        <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-[11px]">{i + 1}</span>
+                        {step}
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              ) : null}
+
+              {cs.impact ? (
+                <section id="impact" className="scroll-mt-28">
+                  <h2 className="text-xl sm:text-2xl font-semibold">{LABELS.impact}</h2>
+                  <p className="mt-3 text-[1.02rem] leading-relaxed text-black/80 dark:text-white/80">{cs.impact}</p>
+                </section>
+              ) : null}
+            </div>
+          )}
+
+          {/* Nav bas */}
+          <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-black/10 dark:border-white/10 pt-6">
+            {prev ? (
+              <Link to={"/projects/" + prev.id} className="inline-flex items-center gap-2 text-sm opacity-80 hover:opacity-100 underline-offset-4 hover:underline">
+                <ChevronLeft size={16} /> {LABELS.previous}
+              </Link>
+            ) : <span />}
+            <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="text-sm opacity-80 hover:opacity-100 underline underline-offset-4">
+              {LABELS.toTop}
+            </button>
+            {next ? (
+              <Link to={"/projects/" + next.id} className="inline-flex items-center gap-2 text-sm opacity-80 hover:opacity-100 underline-offset-4 hover:underline">
+                {LABELS.next} <ChevronRight size={16} />
+              </Link>
+            ) : <span />}
+          </div>
+        </article>
       </div>
     </div>
   );
