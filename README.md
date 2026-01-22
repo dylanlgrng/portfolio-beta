@@ -1,16 +1,19 @@
-# Dylan — Portfolio (12 projets + nav + back)
+# Dylan — Portfolio (horizontal projects + dark fix + lang/theme FX)
 
 - React + Vite + Tailwind
 - HashRouter (GitHub Pages OK)
-- FR/EN + Dark/Light
-- 12 projets, pages avec Titre / Sous-titre / Résumé / Description
-- **Prev / Next** en bas des pages projets
-- **Back** retourne à `/#/?open=projects&show=all` (liste projets ouverte + tout affiché)
-- Animations accordéons + reveal "Voir tout / Voir moins" lisses et robustes
-- Images faciles à remplacer : `public/images/projects/p01.svg` … `p11.svg` et `public/images/logomaif.svg`
+- FR/EN + Dark/Light (transition-colors)
+- Projets : **tous visibles** dans un **scroller horizontal** (scroll-snap)
+- Pages projet : **Précédent / Suivant** + **Retour** → `/#/?open=projects`
+- Animations : accordéons smooth + fade du contenu au switch de langue
 
 ## Modifier le contenu
 `src/App.jsx` → objet `CONTENT` (FR & EN).
 
 ## Remplacer les images
-Upload une image en gardant le même nom dans `public/images/projects/`.
+- MAIF : `public/images/logomaif.svg`
+- Autres projets : `public/images/projects/p01.svg … p11.svg`
+
+## Déploiement GitHub Pages
+- Push sur `main` → **Actions** build & deploy
+- Router : 404.html copié automatiquement

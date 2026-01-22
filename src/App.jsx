@@ -8,8 +8,8 @@ const CONTENT = {
   fr: {
     hero: { hello: "Bonjour je suis Dylan,", after: "UX Republic à Bordeaux." },
     labels: {
-      about: "À propos", projects: "Projets", seeAll: "Voir tout", seeLess: "Voir moins",
-      previousWork: "Expériences récentes", sayHello: "Dire bonjour", back: "Retour",
+      about: "À propos", projects: "Projets", previousWork: "Expériences récentes",
+      sayHello: "Dire bonjour", back: "Retour",
       info: "Ce site internet a été éco‑conçu par moi à Bordeaux en 2025, et il a été entièrement codé par GPT5.",
       next: "Projet suivant", prev: "Projet précédent"
     },
@@ -29,8 +29,8 @@ const CONTENT = {
   en: {
     hero: { hello: "Hi, I’m Dylan,", after: "UX Republic in Bordeaux." },
     labels: {
-      about: "About me", projects: "Projects", seeAll: "See all", seeLess: "See less",
-      previousWork: "Previous work", sayHello: "Say hello", back: "Back",
+      about: "About me", projects: "Projects", previousWork: "Previous work",
+      sayHello: "Say hello", back: "Back",
       info: "This website was eco‑designed by me in Bordeaux in 2025 and fully coded by GPT5.",
       next: "Next project", prev: "Previous project"
     },
@@ -49,17 +49,32 @@ const CONTENT = {
   }
 };
 
-// Seed projects (12 total)
-const FR = CONTENT.fr.projects;
-FR.push({ id:"maif", title:"MAIF — Outils métiers & design system", subtitle:"Mission en cours (UX Republic → MAIF)", image:"images/logomaif.svg", summary:"Évolution d’outils métiers, design system, accessibilité.", description:"Au sein de la DSI de la MAIF, j’accompagne l’évolution des outils métiers. Co‑conception avec les équipes projet, contribution au design system, attention continue à l’accessibilité et à l’éco‑conception, et participation aux réflexions collectives autour des pratiques et de l’IA." });
-for (let i=1;i<=11;i++){ const id = "p"+String(i).padStart(2,"0");
-  FR.push({ id, title:`Projet ${i} — Titre provisoire`, subtitle:"Sous‑titre / contexte rapide", image:`images/projects/${id}.svg`, summary:"Courte phrase d’accroche du projet.", description:"Décrivez ici les objectifs, les contraintes et votre rôle. Ajoutez vos livrables (recherche, maquettes, design system…), les résultats et ce que vous avez appris." });
+// Seed 12 projects (FR & EN), MAIF first
+function seed(lang) {
+  const arr = CONTENT[lang].projects;
+  arr.push({ id:"maif", title: lang==="fr" ? "MAIF — Outils métiers & design system" : "MAIF — Internal tools & design system",
+    subtitle: lang==="fr" ? "Mission en cours (UX Republic → MAIF)" : "Ongoing assignment (UX Republic → MAIF)",
+    image:"images/logomaif.svg",
+    summary: lang==="fr" ? "Évolution d’outils métiers, design system, accessibilité." : "Internal tools, design system, accessibility.",
+    description: lang==="fr"
+      ? "Au sein de la DSI de la MAIF, j’accompagne l’évolution des outils métiers. Co‑conception avec les équipes projet, contribution au design system, attention continue à l’accessibilité et à l’éco‑conception, et participation aux réflexions collectives autour des pratiques et de l’IA."
+      : "Within MAIF’s IT department, I help evolve internal tools. Co‑design with project teams, design system contributions, continuous focus on accessibility and eco‑design, plus collective reflections around practices and AI."
+  });
+  for (let i=1;i<=11;i++){
+    const id = "p"+String(i).padStart(2,"0");
+    arr.push({
+      id,
+      title: lang==="fr" ? `Projet ${i} — Titre provisoire` : `Project ${i} — Working title`,
+      subtitle: lang==="fr" ? "Sous‑titre / contexte rapide" : "Subtitle / quick context",
+      image:`images/projects/${id}.svg`,
+      summary: lang==="fr" ? "Courte phrase d’accroche du projet." : "Short one‑liner for the card.",
+      description: lang==="fr" ?
+        "Décrivez ici les objectifs, les contraintes et votre rôle. Ajoutez vos livrables (recherche, maquettes, design system…), les résultats et ce que vous avez appris." :
+        "Describe goals, constraints, and your role. Add deliverables (research, wireframes, design system…), outcomes, and what you learned."
+    });
+  }
 }
-const EN = CONTENT.en.projects;
-EN.push({ id:"maif", title:"MAIF — Internal tools & design system", subtitle:"Ongoing assignment (UX Republic → MAIF)", image:"images/logomaif.svg", summary:"Internal tools, design system, accessibility.", description:"Within MAIF’s IT department, I help evolve internal tools. Co‑design with project teams, design system contributions, continuous focus on accessibility and eco‑design, plus collective reflections around practices and AI." });
-for (let i=1;i<=11;i++){ const id = "p"+String(i).padStart(2,"0");
-  EN.push({ id, title:`Project ${i} — Working title`, subtitle:"Subtitle / quick context", image:`images/projects/${id}.svg`, summary:"Short one‑liner for the card.", description:"Describe goals, constraints, and your role. Add deliverables (research, wireframes, design system…), outcomes, and what you learned." });
-}
+seed("fr"); seed("en");
 
 function getInitialLang(){ return (localStorage.getItem("lang") === "en") ? "en" : "fr"; }
 function getInitialTheme(){ const s = localStorage.getItem("theme"); if (s === "dark" || s === "light") return s; const h = new Date().getHours(); return (h >= 7 && h < 19) ? "light" : "dark"; }
@@ -152,7 +167,7 @@ function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang }) {
   );
 }
 
-function TopRightControls({ lang, setLang, theme, setTheme }) {
+function TopRightControls({ lang, setLang, theme, setTheme, onLangFX }) {
   const t = CONTENT[lang];
   const [open, setOpen] = useState(false);
   const tooltipRef = useRef(null);
@@ -163,7 +178,7 @@ function TopRightControls({ lang, setLang, theme, setTheme }) {
   }, []);
   return (
     <div className="relative flex items-center justify-end gap-3 text-xs opacity-80 hover:opacity-100 transition">
-      <button onClick={() => setLang(lang === "fr" ? "en" : "fr")} className="rounded-full border border-black/10 dark:border-white/10 px-2 py-1 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
+      <button onClick={() => { setLang(lang === "fr" ? "en" : "fr"); onLangFX(); }} className="rounded-full border border-black/10 dark:border-white/10 px-2 py-1 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
         {lang === "fr" ? "EN" : "FR"}
       </button>
       <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="rounded-full border border-black/10 dark:border-white/10 p-1.5 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
@@ -199,15 +214,12 @@ function useQueryState() {
 function Home({ lang, setLang, theme, setTheme }) {
   const t = CONTENT[lang];
   const q = useQueryState();
-  const initialOpen = q.get("open") || null; // "projects" | "about" | null
-  const initialShow = q.get("show") === "all";
+  const initialOpen = q.get("open") || null;
   const [open, setOpen] = useState(initialOpen);
-  const [showAll, setShowAll] = useState(initialShow);
+  useEffect(() => { setOpen(q.get("open")); }, [q.get("open")]);
 
-  useEffect(() => {
-    setOpen(q.get("open"));
-    setShowAll(q.get("show") === "all");
-  }, [q.get("open"), q.get("show")]);
+  const [langFx, setLangFx] = useState(false);
+  function triggerLangFX(){ setLangFx(true); setTimeout(() => setLangFx(false), 280); }
 
   const heroWrapRef = useRef(null);
   const heroTextRef = useRef(null);
@@ -248,26 +260,32 @@ function Home({ lang, setLang, theme, setTheme }) {
     setBgX(Math.round(clamped * 100));
   }
 
-  function toggleShowAll() {
-    const next = !showAll;
-    setShowAll(next);
-    q.set({ open: "projects", show: next ? "all" : null });
-  }
-
   function openSection(name){
     const next = (open === name) ? null : name;
     setOpen(next);
-    q.set({ open: next || null, show: (next === "projects" && showAll) ? "all" : null });
+    q.set({ open: next || null });
   }
 
+  // Prepare scroller reveal effect
+  const scrollerRef = useRef(null);
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+    // Stagger attribute
+    const cards = el.querySelectorAll(".card");
+    cards.forEach((c, i) => c.style.setProperty("--d", (i*60)+"ms"));
+    // Mark ready for CSS reveal
+    requestAnimationFrame(() => el.classList.add("ready"));
+  }, [lang]);
+
   return (
-    <main className="flex min-h-dvh flex-col font-light" style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans', sans-serif" }}>
+    <main className={"theme-shell flex min-h-dvh flex-col bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100"} style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans', sans-serif" }}>
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 pt-4">
-        <TopRightControls lang={lang} setLang={setLang} theme={theme} setTheme={setTheme} />
+        <TopRightControls lang={lang} setLang={setLang} theme={theme} setTheme={setTheme} onLangFX={triggerLangFX} />
       </div>
 
       <div className="mx-auto mt-auto w-full max-w-6xl px-4 sm:px-6">
-        <div ref={heroWrapRef} className="pb-4 select-none" onMouseEnter={() => setHovering(true)} onMouseMove={onMouseMoveHero} onMouseLeave={() => setHovering(false)}>
+        <div ref={heroWrapRef} className={"pb-4 select-none " + (langFx ? "lang-fx" : "")} onMouseEnter={() => setHovering(true)} onMouseMove={onMouseMoveHero} onMouseLeave={() => setHovering(false)}>
           <div ref={heroTextRef}>
             <IntroTitle lang={lang} hovering={hovering} bgX={bgX} dims={dims} spacePx={spacePx} heroRef={heroTextRef} />
           </div>
@@ -309,20 +327,11 @@ function Home({ lang, setLang, theme, setTheme }) {
           </div>
         </SectionRow>
 
-        <SectionRow
-          label={t.labels.projects}
-          rightAdornment={open === "projects" ? (
-            <button onClick={toggleShowAll} className="text-sm underline-offset-4 hover:underline">
-              {showAll ? t.labels.seeLess : t.labels.seeAll}
-            </button>
-          ) : null}
-          isOpen={open === "projects"}
-          onToggle={() => openSection("projects")}
-        >
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {(CONTENT[lang].projects || []).slice(0,4).map((p) => (
-                <div key={p.id}>
+        <SectionRow label={t.labels.projects} isOpen={open === "projects"} onToggle={() => openSection("projects")}>
+          <div className="space-y-3">
+            <div ref={scrollerRef} className="hscroller">
+              {(CONTENT[lang].projects || []).map((p, i) => (
+                <div key={p.id} className="card">
                   <Link to={"/projects/" + p.id} className="group block overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 shadow-sm ring-1 ring-black/5 dark:ring-white/5 transition bg-white dark:bg-neutral-900">
                     <img src={p.image} alt={"aperçu " + p.title} className="aspect-[4/3] w-full object-cover" />
                     <div className="flex items-center justify-between p-3">
@@ -333,94 +342,10 @@ function Home({ lang, setLang, theme, setTheme }) {
                 </div>
               ))}
             </div>
-
-            <Extras show={showAll} items={(CONTENT[lang].projects || []).slice(4)} />
           </div>
         </SectionRow>
       </div>
     </main>
-  );
-}
-
-function Extras({ show, items }){
-  const ref = useRef(null);
-  const grid = useRef(null);
-
-  useEffect(() => {
-    const el = ref.current, g = grid.current;
-    if (!el) return;
-
-    if (show) {
-      el.classList.add("open");
-      if (g) {
-        g.classList.add("open");
-        g.classList.remove("closing");
-        const cards = g.querySelectorAll(".card");
-        for (let i=0;i<cards.length;i++) cards[i].style.setProperty("--d", (i*60)+"ms");
-      }
-      requestAnimationFrame(() => {
-        el.style.height = "0px";
-        requestAnimationFrame(() => {
-          const inner = el.firstElementChild;
-          const target = inner ? inner.scrollHeight : 0;
-          el.style.height = target + "px";
-          function onEnd(e){
-            if (e.target !== el || e.propertyName !== "height") return;
-            el.style.height = "auto";
-            el.removeEventListener("transitionend", onEnd);
-          }
-          el.addEventListener("transitionend", onEnd);
-        });
-      });
-    } else {
-      if (g) {
-        g.classList.remove("open");
-        g.classList.add("closing");
-        const cards = g.querySelectorAll(".card");
-        for (let i=0;i<cards.length;i++) cards[i].style.setProperty("--dc", ((cards.length-1-i)*60)+"ms");
-      }
-      const inner = el.firstElementChild;
-      const cur = inner ? inner.scrollHeight : 0;
-      el.style.height = cur + "px";
-      requestAnimationFrame(() => {
-        el.classList.remove("open");
-        el.style.height = "0px";
-        el.style.clipPath = "inset(0% 0% 100% 0%)";
-        el.style.filter = "blur(6px)";
-        el.style.opacity = "0";
-      });
-    }
-  }, [show, items && items.length]);
-
-  function onImgLoad(){
-    const el = ref.current; if (!el) return;
-    if (el.classList.contains("open") && el.style.height !== "auto") {
-      const inner = el.firstElementChild;
-      const target = inner ? inner.scrollHeight : 0;
-      el.style.height = target + "px";
-    }
-  }
-
-  return (
-    <div ref={ref} className={"extras" + (show ? " open" : "")} style={{ height: "0px" }}>
-      {show ? (
-        <div ref={grid} className="extras-grid open">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 pt-6">
-            {items.map((p,i) => (
-              <div key={p.id} className="card">
-                <Link to={"/projects/" + p.id} className="group block overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 ring-1 ring-black/5 dark:ring-white/5 transition bg-white dark:bg-neutral-900">
-                  <img src={p.image} alt={"aperçu " + p.title} onLoad={onImgLoad} className="aspect-[4/3] w-full object-cover" />
-                  <div className="flex items-center justify-between p-3">
-                    <span className="text-sm font-medium">{p.title}</span>
-                    <ArrowUpRight className="opacity-60 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" size={16} />
-                  </div>
-                </Link>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : null}
-    </div>
   );
 }
 
@@ -436,7 +361,7 @@ function ProjectPage({ lang }) {
   if (!project) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16">
-        <button onClick={() => navigate('/?open=projects&show=all')} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
+        <button onClick={() => navigate('/?open=projects')} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
           <ChevronLeft size={16} /> {t.labels.back}
         </button>
         <p>Not found.</p>
@@ -449,7 +374,7 @@ function ProjectPage({ lang }) {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-16">
-      <button onClick={() => navigate('/?open=projects&show=all')} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
+      <button onClick={() => navigate('/?open=projects')} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
         <ChevronLeft size={16} /> {t.labels.back}
       </button>
 
@@ -485,7 +410,11 @@ export default function App() {
   const [lang, setLang] = useState(getInitialLang());
   const [theme, setTheme] = useState(getInitialTheme());
   useEffect(() => { localStorage.setItem("lang", lang); }, [lang]);
-  useEffect(() => { localStorage.setItem("theme", theme); const r = document.documentElement; if (theme === "dark") r.classList.add("dark"); else r.classList.remove("dark"); }, [theme]);
+  useEffect(() => {
+    localStorage.setItem("theme", theme);
+    const r = document.documentElement;
+    if (theme === "dark") r.classList.add("dark"); else r.classList.remove("dark");
+  }, [theme]);
 
   return (
     <HashRouter>
