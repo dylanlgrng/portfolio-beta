@@ -1,11 +1,17 @@
-# Beta Portfolio v8
-- Mouse-position gradient on "Product Designer"
-- Airy About (Apple-like), minimal cards
-- FR/EN bilingual with tiny toggle (top-right)
-- Dark mode toggle (sun/moon) with Tailwind `dark` class
-- Smooth accordion animations
-- Email protected (Base64)
-- GitHub Pages workflow (master + main) + SPA 404
+# Dylan — Portfolio (12 projets)
 
-## Edit content
-`src/content/site.json` has both `fr` and `en` sections.
+- React + Vite + Tailwind
+- HashRouter (GitHub Pages OK)
+- FR/EN + Dark/Light
+- 12 projets (cards) + pages projets auto (titre / sous‑titre / texte)
+- Images faciles à remplacer : `public/images/projects/p01.svg` … `p11.svg` et `public/images/logomaif.svg`
+
+## Modifier les titres / textes
+`src/App.jsx` → objet `CONTENT` (FR & EN). Chaque projet a `title`, `subtitle`, `summary`, `description`, `image`.
+
+## Remplacer les images
+Uploade ta nouvelle image **en gardant le même nom** (ex. `p03.svg`) dans `public/images/projects/`.
+
+## Local
+npm install
+npm run dev
