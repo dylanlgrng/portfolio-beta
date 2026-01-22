@@ -1,11 +1,11 @@
-# Dylan — Portfolio (horizontal projects + dark fix + lang/theme FX)
+# Dylan — Portfolio (h-scroll v2: full-bleed + scramble)
 
 - React + Vite + Tailwind
 - HashRouter (GitHub Pages OK)
-- FR/EN + Dark/Light (transition-colors)
-- Projets : **tous visibles** dans un **scroller horizontal** (scroll-snap)
+- FR/EN + Dark/Light with fade
+- **Scramble** animation on language change (split‑flap style) for visible texts
+- Projets : **horizontal full‑bleed scroller** (cards smaller), scroll-snap
 - Pages projet : **Précédent / Suivant** + **Retour** → `/#/?open=projects`
-- Animations : accordéons smooth + fade du contenu au switch de langue
 
 ## Modifier le contenu
 `src/App.jsx` → objet `CONTENT` (FR & EN).
