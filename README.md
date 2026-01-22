@@ -1,19 +1,13 @@
-# Dylan — Portfolio (h-scroll v2: full-bleed + scramble)
+# Dylan — Portfolio (h-scroll v2)
+- Projets en **scroll horizontal** full-bleed (dépassent sur les côtés)
+- **Dark/Light** OK (transition-colors), switch langue avec léger **fade**
+- HashRouter (GitHub Pages)
+- 12 projets FR/EN
 
-- React + Vite + Tailwind
-- HashRouter (GitHub Pages OK)
-- FR/EN + Dark/Light with fade
-- **Scramble** animation on language change (split‑flap style) for visible texts
-- Projets : **horizontal full‑bleed scroller** (cards smaller), scroll-snap
-- Pages projet : **Précédent / Suivant** + **Retour** → `/#/?open=projects`
+## Modifier
+- `src/App.jsx` → textes
+- `public/images/logomaif.svg` + `public/images/projects/p01.svg…p11.svg` → images
 
-## Modifier le contenu
-`src/App.jsx` → objet `CONTENT` (FR & EN).
-
-## Remplacer les images
-- MAIF : `public/images/logomaif.svg`
-- Autres projets : `public/images/projects/p01.svg … p11.svg`
-
-## Déploiement GitHub Pages
-- Push sur `main` → **Actions** build & deploy
-- Router : 404.html copié automatiquement
+## Déploiement
+- Push → Actions build & deploy
+- 404.html auto
