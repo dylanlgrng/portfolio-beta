@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { HashRouter, Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
-import { ChevronLeft, ChevronRight, Plus, Minus, Mail, Linkedin, Phone, ArrowUpRight, Sun, Moon, Info } from "lucide-react";
+import { ChevronLeft, Plus, Minus, Mail, Linkedin, Phone, ArrowUpRight, Sun, Moon, Info } from "lucide-react";
 
 const EMAIL_B64 = "bGFncmFuZ2VkeWxhbkBnbWFpbC5jb20=";
 
@@ -47,52 +47,38 @@ const CONTENT = {
   }
 };
 
-CONTENT.fr.projects = [
-  { id:"maif", title:"MAIF — Outils métiers & design system", image:"images/logomaif.svg", summary:"Évolution des outils métiers au sein de la DSI de la MAIF.",
-    cs: {
-      start: "Le besoin : moderniser et rendre plus efficaces des outils métiers clés, afin de fluidifier les tâches courantes et réduire l’appui support.",
-      problem: "Au fil du temps, les écrans et les parcours se sont fragmentés. Les tâches simples devenaient lentes, et l’expérience peinait à suivre les attentes des utilisateurs.",
-      activities: [
-        "Audit UX & cartographie des tâches",
-        "Ateliers d’alignement équipes",
-        "Analyse comportementale & diagnostics",
-        "Cohérence écosystème & design system"
-      ],
-      process: [
-        "Définition des jalons & gouvernance",
-        "Co‑conception workflow & refonte des flows",
-        "Itérations testées (qualitatives & quantitatives)",
-        "Déploiement phasé & suivi"
-      ],
-      impact: "Une base plus rapide et cohérente : parcours clarifiés, meilleures finalisations de tâches, et une expérience plus moderne et durable."
-    }
-  },
-  { id:"engagenow", title:"EngageNow — E-learning & back-office", image:"https://picsum.photos/seed/ux1/800/600", summary:"Refonte pour engager, simplifier et harmoniser.", description:"Plateforme e-learning. Simplification UI, design system, gamification, wording clarifié." },
-  { id:"ninjae", title:"Ninjaé — Plateforme micro-entreprises (BPCE)", image:"https://picsum.photos/seed/ux2/800/600", summary:"Du cadrage à l’UI, un SaaS accessible et efficace.", description:"SaaS pour micro-entreprises. Connexion bancaire, URSSAF, devis/factures/clients, pilotage." },
-  { id:"kairos-blue", title:"Kairos Blue — CMS/LMS/EMS & Back-office", image:"https://picsum.photos/seed/ux3/800/600", summary:"Plateforme unifiée, éco-conçue et versionnée.", description:"Plateforme tout‑en‑un, design system robuste, déploiements multiples." },
-  { id:"mon-service-rh", title:"Mon Service RH — Plateforme & back-office", image:"https://picsum.photos/seed/ux4/800/600", summary:"Une solution RH pour TPE/PME.", description:"Plateforme principale, prestataires, paiement, back‑office sur‑mesure." },
-  { id:"ffbad", title:"FFBaD — Site fédéral & back-office", image:"https://picsum.photos/seed/ux5/800/600", summary:"Refonte pour Paris 2024 + DS.", description:"Parcours, structure, DS; back‑office éco‑conçu; fonctionnalités riches." },
-  { id:"pacte-onu", title:"Pacte mondial des Nations Unies — Site & espace membre", image:"https://picsum.photos/seed/ux6/800/600", summary:"Informer & outiller les membres.", description:"Espace membre : documents, annuaire, blog; accessibilité site vitrine." },
-  { id:"finaqui", title:"Finaqui — Extranet & back-office", image:"https://picsum.photos/seed/ux7/800/600", summary:"Automatiser les workflows.", description:"Suivi de projets, candidatures, décisions; permissions; construit sur Blue." }
-];
-CONTENT.en.projects = [
-  { id:"maif", title:"MAIF — Internal tools & design system", image:"images/logomaif.svg", summary:"Evolving internal tools within MAIF’s IT department.",
-    cs: {
-      start: "The goal: modernize key internal tools to streamline common tasks and reduce support reliance.",
-      problem: "Over time, screens and flows had become fragmented. Simple tasks took longer, and the experience lagged behind expectations.",
-      activities: ["System UX audit & task mapping","Team alignment workshops","Behavioral analysis & diagnostics","Ecosystem cohesion & design system"],
-      process: ["Milestone definition & governance","Workflow co‑creation & flow redesign","Validated iterations (qual & quant)","Phased rollout & monitoring"],
-      impact: "A faster, more coherent foundation: clearer flows, higher task completion, and a modern, durable experience."
-    }
-  },
-  { id:"engagenow", title:"EngageNow — E-learning & admin", image:"https://picsum.photos/seed/ux1/800/600", summary:"Refocus the experience to drive engagement.", description:"Simplified UI, design system, pedagogy, gamification, clearer wording." },
-  { id:"ninjae", title:"Ninjaé — Micro‑business platform (BPCE)", image:"https://picsum.photos/seed/ux2/800/600", summary:"From research to UI.", description:"Bank connection, URSSAF, quotes/invoices/CRM, finances & ledger." },
-  { id:"kairos-blue", title:"Kairos Blue — CMS/LMS/EMS & admin", image:"https://picsum.photos/seed/ux3/800/600", summary:"Unified, eco‑designed, versioned.", description:"Robust DS, faster delivery, coherent UX across clients." },
-  { id:"mon-service-rh", title:"Mon Service RH — Platform & admin", image:"https://picsum.photos/seed/ux4/800/600", summary:"HR for SMBs with accessibility.", description:"Main platform, providers area, payment flow, custom back‑office." },
-  { id:"ffbad", title:"FFBaD — Federation site & admin", image:"https://picsum.photos/seed/ux5/800/600", summary:"Paris 2024 momentum + DS.", description:"Journeys, structure, DS; eco‑designed back‑office and features." },
-  { id:"pacte-onu", title:"UN Global Compact — Site & member area", image:"https://picsum.photos/seed/ux6/800/600", summary:"Public info & member tools.", description:"Docs sharing, directory, blog; accessibility improvements." },
-  { id:"finaqui", title:"Finaqui — Extranet & admin", image:"https://picsum.photos/seed/ux7/800/600", summary:"Automated workflows.", description:"Projects tracking, applications, decisions, permissions; built on Blue." }
-];
+// Build 12 projects (MAIF + 11 placeholders)
+const FR = CONTENT.fr.projects;
+FR.push(
+  { id:"maif", title:"MAIF — Outils métiers & design system", subtitle:"Mission en cours (UX Republic → MAIF)", image:"images/logomaif.svg", summary:"Évolution d’outils métiers, design system, accessibilité.", description:"Au sein de la DSI de la MAIF, j’accompagne l’évolution des outils métiers. Co‑conception avec les équipes projet, contribution au design system, attention continue à l’accessibilité et à l’éco‑conception, et participation aux réflexions collectives autour des pratiques et de l’IA." }
+);
+for (let i=1;i<=11;i++){
+  const id = "p"+String(i).padStart(2,"0");
+  FR.push({
+    id,
+    title: `Projet ${i} — Titre provisoire`,
+    subtitle: "Sous‑titre / contexte rapide",
+    image: `images/projects/p${String(i).padStart(2,"0")}.svg`,
+    summary: "Courte phrase d’accroche du projet.",
+    description: "Décrivez ici les objectifs, les contraintes et votre rôle. Ajoutez vos livrables (recherche, maquettes, design system…), les résultats et ce que vous avez appris."
+  });
+}
+
+const EN = CONTENT.en.projects;
+EN.push(
+  { id:"maif", title:"MAIF — Internal tools & design system", subtitle:"Ongoing assignment (UX Republic → MAIF)", image:"images/logomaif.svg", summary:"Internal tools, design system, accessibility.", description:"Within MAIF’s IT department, I help evolve internal tools. Co‑design with project teams, design system contributions, continuous focus on accessibility and eco‑design, plus collective reflections around practices and AI." }
+);
+for (let i=1;i<=11;i++){
+  const id = "p"+String(i).padStart(2,"0");
+  EN.push({
+    id,
+    title: `Project ${i} — Working title`,
+    subtitle: "Subtitle / quick context",
+    image: `images/projects/p${String(i).padStart(2,"0")}.svg`,
+    summary: "Short one‑liner for the card.",
+    description: "Describe goals, constraints, and your role. Add deliverables (research, wireframes, design system…), outcomes, and what you learned."
+  });
+}
 
 function getInitialLang(){ return (localStorage.getItem("lang") === "en") ? "en" : "fr"; }
 function getInitialTheme(){ var s = localStorage.getItem("theme"); if (s === "dark" || s === "light") return s; var h = new Date().getHours(); return (h >= 7 && h < 19) ? "light" : "dark"; }
@@ -308,7 +294,7 @@ function Home({ lang, setLang, theme, setTheme }) {
               </div>
               <div>
                 <h3 className="mb-2 text-base font-medium">{t.labels.previousWork}</h3>
-                <ul className="space-y-1 text-sm text-black/70 dark:text:white/70">
+                <ul className="space-y-1 text-sm text-black/70 dark:text-white/70">
                   {t.about.previousWork.map((line, idx) => (<li key={idx}>• {line}</li>))}
                 </ul>
               </div>
@@ -432,33 +418,11 @@ function Extras({ show, items }){
 }
 
 function ProjectPage({ lang }) {
-  const t = CONTENT[lang];
-  const navigate = useNavigate();
-  const { id } = useParams();
-
-  const list = (t.projects || []);
-  const projectIndex = Math.max(0, list.findIndex(p => p.id === id));
-  const project = list[projectIndex];
-  const prev = projectIndex > 0 ? list[projectIndex - 1] : null;
-  const next = projectIndex < list.length - 1 ? list[projectIndex + 1] : null;
-
-  const LABELS = {
-    fr: {
-      back: t.labels.back, toc: "Sommaire",
-      start: "Comment tout a commencé", problem: "Le problème",
-      activities: "Activités clés", process: "Comment on l’a fait",
-      impact: "L’impact", previous: "Étude précédente",
-      next: "Étude suivante", toTop: "Haut de page"
-    },
-    en: {
-      back: t.labels.back, toc: "Contents",
-      start: "How it all started", problem: "The problem",
-      activities: "Key activities", process: "How we made it happen",
-      impact: "Impact", previous: "Previous case study",
-      next: "Next case study", toTop: "Back to top"
-    }
-  }[lang];
-
+  var t = CONTENT[lang];
+  var navigate = useNavigate();
+  var params = useParams();
+  var id = params.id;
+  var project = (t.projects || []).find(p => p.id === id);
   if (!project) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16">
@@ -469,172 +433,19 @@ function ProjectPage({ lang }) {
       </div>
     );
   }
-
-  const cs = project.cs || null;
-  const toc = cs ? [
-    cs.start && { id: "start", label: LABELS.start },
-    cs.problem && { id: "problem", label: LABELS.problem },
-    Array.isArray(cs.activities) && cs.activities.length && { id: "activities", label: LABELS.activities },
-    Array.isArray(cs.process) && cs.process.length && { id: "process", label: LABELS.process },
-    cs.impact && { id: "impact", label: LABELS.impact },
-  ].filter(Boolean) : [];
-
-  const [active, setActive] = React.useState(toc.length ? toc[0].id : null);
-
-  React.useEffect(() => {
-    if (!toc.length) return;
-    const ids = toc.map(s => s.id);
-    const els = ids.map(id => document.getElementById(id)).filter(Boolean);
-    if (!els.length) return;
-
-    const io = new IntersectionObserver((entries) => {
-      const visible = entries.filter(e => e.isIntersecting).sort((a,b)=>b.intersectionRatio-a.intersectionRatio);
-      if (visible[0]) setActive(visible[0].target.id);
-    }, { root: null, rootMargin: "-30% 0px -60% 0px", threshold: [0.1, 0.25, 0.5, 0.75] });
-
-    els.forEach(el => io.observe(el));
-    return () => io.disconnect();
-  }, [id, lang, toc.length]);
-
-  function goTo(anchorId) {
-    const el = document.getElementById(anchorId);
-    if (!el) return;
-    const top = window.scrollY + el.getBoundingClientRect().top - 96;
-    window.scrollTo({ top, behavior: 'smooth' });
-  }
-
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-16" id="top">
+    <div className="mx-auto max-w-4xl px-4 py-16">
       <button onClick={() => navigate(-1)} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
         <ChevronLeft size={16} /> {t.labels.back}
       </button>
-
-      <div className="grid grid-cols-12 gap-8">
-        {toc.length ? (
-          <div className="col-span-12 lg:hidden">
-            <details className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 ring-1 ring-black/5 dark:ring-white/5">
-              <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium">Sommaire</summary>
-              <nav className="px-2 py-2">
-                <ul className="space-y-1">
-                  {toc.map(item => (
-                    <li key={item.id}>
-                      <button
-                        onClick={() => goTo(item.id)}
-                        className={"w-full text-left rounded-md px-3 py-2 text-sm transition " + (active === item.id ? "bg-black/5 dark:bg-white/10 font-medium" : "opacity-80 hover:opacity-100")}
-                      >
-                        {item.label}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            </details>
-          </div>
-        ) : null}
-
-        {toc.length ? (
-          <aside className="hidden lg:col-span-3 lg:block">
-            <nav className="sticky top-24">
-              <div className="mb-2 text-xs uppercase tracking-wide opacity-60">Sommaire</div>
-              <ul className="space-y-1">
-                {toc.map(item => (
-                  <li key={item.id}>
-                    <button
-                      onClick={() => goTo(item.id)}
-                      className={"w-full text-left rounded-md px-3 py-2 text-sm transition " + (active === item.id ? "bg-black/5 dark:bg-white/10 font-medium" : "opacity-80 hover:opacity-100")}
-                      aria-current={active === item.id ? "true" : "false"}
-                    >
-                      {item.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </aside>
-        ) : <div className="hidden lg:block lg:col-span-3" />}
-
-        <article className="col-span-12 lg:col-span-9">
-          <header className="space-y-2">
-            <h1 className="text-3xl sm:text-4xl font-semibold tracking-tight">{project.title}</h1>
-            {project.summary ? <p className="text-black/60 dark:text-white/60">{project.summary}</p> : null}
-          </header>
-
-          {project.image ? (
-            <div className="mt-8 overflow-hidden rounded-2xl ring-1 ring-black/10 dark:ring-white/10">
-              <img src={project.image} alt="" className="w-full aspect-[16/9] object-cover" />
-            </div>
-          ) : null}
-
-          {!project.cs ? (
-            <div className="prose prose-neutral dark:prose-invert max-w-none mt-8">
-              <p>{project.description || ""}</p>
-            </div>
-          ) : (
-            <div className="mt-10 space-y-12">
-              {project.cs.start ? (
-                <section id="start" className="scroll-mt-28">
-                  <h2 className="text-xl sm:text-2xl font-semibold">Comment tout a commencé</h2>
-                  <p className="mt-3 text-[1.02rem] leading-relaxed text-black/80 dark:text-white/80">{project.cs.start}</p>
-                </section>
-              ) : null}
-
-              {project.cs.problem ? (
-                <section id="problem" className="scroll-mt-28">
-                  <h2 className="text-xl sm:text-2xl font-semibold">Le problème</h2>
-                  <p className="mt-3 text-[1.02rem] leading-relaxed text-black/80 dark:text-white/80">{project.cs.problem}</p>
-
-                  {Array.isArray(project.cs.activities) && project.cs.activities.length ? (
-                    <div className="mt-4 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900 px-4 sm:px-5 py-4 ring-1 ring-black/5 dark:ring-white/5">
-                      <div className="text-sm font-medium mb-2">Activités clés</div>
-                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {project.cs.activities.map((a, i) => (
-                          <li key={i} className="rounded-lg border border-black/10 dark:border-white/10 px-3 py-2 text-sm">{a}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  ) : null}
-                </section>
-              ) : null}
-
-              {Array.isArray(project.cs.process) && project.cs.process.length ? (
-                <section id="process" className="scroll-mt-28">
-                  <h2 className="text-xl sm:text-2xl font-semibold">Comment on l’a fait</h2>
-                  <ol className="mt-4 space-y-3">
-                    {project.cs.process.map((step, i) => (
-                      <li key={i} className="rounded-xl border border-black/10 dark:border-white/10 bg-white dark:bg-neutral-900/60 px-4 py-3 text-sm ring-1 ring-black/5 dark:ring-white/5">
-                        <span className="mr-2 inline-flex h-5 w-5 items-center justify-center rounded-full border border-black/10 dark:border-white/10 text-[11px]">{i + 1}</span>
-                        {step}
-                      </li>
-                    ))}
-                  </ol>
-                </section>
-              ) : null}
-
-              {project.cs.impact ? (
-                <section id="impact" className="scroll-mt-28">
-                  <h2 className="text-xl sm:text-2xl font-semibold">L’impact</h2>
-                  <p className="mt-3 text-[1.02rem] leading-relaxed text-black/80 dark:text-white/80">{project.cs.impact}</p>
-                </section>
-              ) : null}
-            </div>
-          )}
-
-          <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-black/10 dark:border-white/10 pt-6">
-            {projectIndex > 0 ? (
-              <Link to={"/projects/" + (list[projectIndex-1].id)} className="inline-flex items-center gap-2 text-sm opacity-80 hover:opacity-100 underline-offset-4 hover:underline">
-                <ChevronLeft size={16} /> Étude précédente
-              </Link>
-            ) : <span />}
-            <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} className="text-sm opacity-80 hover:opacity-100 underline underline-offset-4">
-              Haut de page
-            </button>
-            {projectIndex < list.length-1 ? (
-              <Link to={"/projects/" + (list[projectIndex+1].id)} className="inline-flex items-center gap-2 text-sm opacity-80 hover:opacity-100 underline-offset-4 hover:underline">
-                Étude suivante <ChevronRight size={16} />
-              </Link>
-            ) : <span />}
-          </div>
-        </article>
+      <h1 className="text-3xl font-semibold tracking-tight">{project.title}</h1>
+      {project.subtitle ? <h2 className="mt-2 text-lg text-black/70 dark:text-white/70">{project.subtitle}</h2> : null}
+      {project.summary ? <p className="mt-2 text-black/60 dark:text-white/60">{project.summary}</p> : null}
+      {project.image ? <img src={project.image} alt="aperçu" className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover ring-1 ring-black/10 dark:ring-white/10" /> : null}
+      <div className="prose prose-neutral dark:prose-invert max-w-none mt-6">
+        {Array.isArray(project.description)
+          ? project.description.map((para, idx) => <p key={idx}>{para}</p>)
+          : <p>{project.description || ""}</p>}
       </div>
     </div>
   );
