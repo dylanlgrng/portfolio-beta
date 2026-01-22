@@ -1,17 +1,16 @@
-# Dylan — Portfolio (12 projets)
+# Dylan — Portfolio (12 projets + nav + back)
 
 - React + Vite + Tailwind
 - HashRouter (GitHub Pages OK)
 - FR/EN + Dark/Light
-- 12 projets (cards) + pages projets auto (titre / sous‑titre / texte)
+- 12 projets, pages avec Titre / Sous-titre / Résumé / Description
+- **Prev / Next** en bas des pages projets
+- **Back** retourne à `/#/?open=projects&show=all` (liste projets ouverte + tout affiché)
+- Animations accordéons + reveal "Voir tout / Voir moins" lisses et robustes
 - Images faciles à remplacer : `public/images/projects/p01.svg` … `p11.svg` et `public/images/logomaif.svg`
 
-## Modifier les titres / textes
-`src/App.jsx` → objet `CONTENT` (FR & EN). Chaque projet a `title`, `subtitle`, `summary`, `description`, `image`.
+## Modifier le contenu
+`src/App.jsx` → objet `CONTENT` (FR & EN).
 
 ## Remplacer les images
-Uploade ta nouvelle image **en gardant le même nom** (ex. `p03.svg`) dans `public/images/projects/`.
-
-## Local
-npm install
-npm run dev
+Upload une image en gardant le même nom dans `public/images/projects/`.

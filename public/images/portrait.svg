@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600">
-  <defs><linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
-    <stop stop-color="#e5e7eb" offset="0"/><stop stop-color="#cbd5e1" offset="1"/>
-  </linearGradient></defs>
-  <rect width="100%" height="100%" fill="url(#g)"/>
-  <circle cx="300" cy="220" r="100" fill="#94a3b8"/>
-  <rect x="150" y="340" width="300" height="180" rx="24" fill="#a3b6c8"/>
-  <text x="300" y="560" font-family="sans-serif" font-size="24" fill="#475569" text-anchor="middle">Portrait placeholder</text>
-</svg>
+<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600'><rect width='100%' height='100%' fill='#e5e7eb'/><circle cx='300' cy='220' r='100' fill='#94a3b8'/><rect x='150' y='340' width='300' height='180' rx='24' fill='#a3b6c8'/></svg>

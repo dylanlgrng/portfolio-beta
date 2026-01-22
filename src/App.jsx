@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { HashRouter, Routes, Route, Link, useParams, useNavigate } from "react-router-dom";
+import { HashRouter, Routes, Route, Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Plus, Minus, Mail, Linkedin, Phone, ArrowUpRight, Sun, Moon, Info } from "lucide-react";
 
 const EMAIL_B64 = "bGFncmFuZ2VkeWxhbkBnbWFpbC5jb20=";
@@ -10,7 +10,8 @@ const CONTENT = {
     labels: {
       about: "À propos", projects: "Projets", seeAll: "Voir tout", seeLess: "Voir moins",
       previousWork: "Expériences récentes", sayHello: "Dire bonjour", back: "Retour",
-      info: "Ce site internet a été éco‑conçu par moi à Bordeaux en 2025, et il a été entièrement codé par GPT5."
+      info: "Ce site internet a été éco‑conçu par moi à Bordeaux en 2025, et il a été entièrement codé par GPT5.",
+      next: "Projet suivant", prev: "Projet précédent"
     },
     about: {
       name: "Dylan Lagrange",
@@ -30,7 +31,8 @@ const CONTENT = {
     labels: {
       about: "About me", projects: "Projects", seeAll: "See all", seeLess: "See less",
       previousWork: "Previous work", sayHello: "Say hello", back: "Back",
-      info: "This website was eco‑designed by me in Bordeaux in 2025 and fully coded by GPT5."
+      info: "This website was eco‑designed by me in Bordeaux in 2025 and fully coded by GPT5.",
+      next: "Next project", prev: "Previous project"
     },
     about: {
       name: "Dylan Lagrange",
@@ -47,48 +49,26 @@ const CONTENT = {
   }
 };
 
-// Build 12 projects (MAIF + 11 placeholders)
+// Seed projects (12 total)
 const FR = CONTENT.fr.projects;
-FR.push(
-  { id:"maif", title:"MAIF — Outils métiers & design system", subtitle:"Mission en cours (UX Republic → MAIF)", image:"images/logomaif.svg", summary:"Évolution d’outils métiers, design system, accessibilité.", description:"Au sein de la DSI de la MAIF, j’accompagne l’évolution des outils métiers. Co‑conception avec les équipes projet, contribution au design system, attention continue à l’accessibilité et à l’éco‑conception, et participation aux réflexions collectives autour des pratiques et de l’IA." }
-);
-for (let i=1;i<=11;i++){
-  const id = "p"+String(i).padStart(2,"0");
-  FR.push({
-    id,
-    title: `Projet ${i} — Titre provisoire`,
-    subtitle: "Sous‑titre / contexte rapide",
-    image: `images/projects/p${String(i).padStart(2,"0")}.svg`,
-    summary: "Courte phrase d’accroche du projet.",
-    description: "Décrivez ici les objectifs, les contraintes et votre rôle. Ajoutez vos livrables (recherche, maquettes, design system…), les résultats et ce que vous avez appris."
-  });
+FR.push({ id:"maif", title:"MAIF — Outils métiers & design system", subtitle:"Mission en cours (UX Republic → MAIF)", image:"images/logomaif.svg", summary:"Évolution d’outils métiers, design system, accessibilité.", description:"Au sein de la DSI de la MAIF, j’accompagne l’évolution des outils métiers. Co‑conception avec les équipes projet, contribution au design system, attention continue à l’accessibilité et à l’éco‑conception, et participation aux réflexions collectives autour des pratiques et de l’IA." });
+for (let i=1;i<=11;i++){ const id = "p"+String(i).padStart(2,"0");
+  FR.push({ id, title:`Projet ${i} — Titre provisoire`, subtitle:"Sous‑titre / contexte rapide", image:`images/projects/${id}.svg`, summary:"Courte phrase d’accroche du projet.", description:"Décrivez ici les objectifs, les contraintes et votre rôle. Ajoutez vos livrables (recherche, maquettes, design system…), les résultats et ce que vous avez appris." });
 }
-
 const EN = CONTENT.en.projects;
-EN.push(
-  { id:"maif", title:"MAIF — Internal tools & design system", subtitle:"Ongoing assignment (UX Republic → MAIF)", image:"images/logomaif.svg", summary:"Internal tools, design system, accessibility.", description:"Within MAIF’s IT department, I help evolve internal tools. Co‑design with project teams, design system contributions, continuous focus on accessibility and eco‑design, plus collective reflections around practices and AI." }
-);
-for (let i=1;i<=11;i++){
-  const id = "p"+String(i).padStart(2,"0");
-  EN.push({
-    id,
-    title: `Project ${i} — Working title`,
-    subtitle: "Subtitle / quick context",
-    image: `images/projects/p${String(i).padStart(2,"0")}.svg`,
-    summary: "Short one‑liner for the card.",
-    description: "Describe goals, constraints, and your role. Add deliverables (research, wireframes, design system…), outcomes, and what you learned."
-  });
+EN.push({ id:"maif", title:"MAIF — Internal tools & design system", subtitle:"Ongoing assignment (UX Republic → MAIF)", image:"images/logomaif.svg", summary:"Internal tools, design system, accessibility.", description:"Within MAIF’s IT department, I help evolve internal tools. Co‑design with project teams, design system contributions, continuous focus on accessibility and eco‑design, plus collective reflections around practices and AI." });
+for (let i=1;i<=11;i++){ const id = "p"+String(i).padStart(2,"0");
+  EN.push({ id, title:`Project ${i} — Working title`, subtitle:"Subtitle / quick context", image:`images/projects/${id}.svg`, summary:"Short one‑liner for the card.", description:"Describe goals, constraints, and your role. Add deliverables (research, wireframes, design system…), outcomes, and what you learned." });
 }
 
 function getInitialLang(){ return (localStorage.getItem("lang") === "en") ? "en" : "fr"; }
-function getInitialTheme(){ var s = localStorage.getItem("theme"); if (s === "dark" || s === "light") return s; var h = new Date().getHours(); return (h >= 7 && h < 19) ? "light" : "dark"; }
+function getInitialTheme(){ const s = localStorage.getItem("theme"); if (s === "dark" || s === "light") return s; const h = new Date().getHours(); return (h >= 7 && h < 19) ? "light" : "dark"; }
 
-function SectionRow(props) {
-  var { label, rightAdornment, isOpen, onToggle, children } = props;
-  var boxRef = useRef(null);
-  var innerRef = useRef(null);
-  var [height, setHeight] = useState(isOpen ? "auto" : "0px");
-  var roRef = useRef(null);
+function SectionRow({ label, rightAdornment, isOpen, onToggle, children }) {
+  const boxRef = useRef(null);
+  const innerRef = useRef(null);
+  const [height, setHeight] = useState(isOpen ? "auto" : "0px");
+  const roRef = useRef(null);
 
   useEffect(() => {
     const el = boxRef.current, inner = innerRef.current;
@@ -153,39 +133,33 @@ function SectionRow(props) {
 }
 
 function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang }) {
-  var t = CONTENT[lang];
-  var maxWidth = dims && dims.maxWidth; var maxHeight = dims && dims.maxHeight;
+  const t = CONTENT[lang];
+  const maxWidth = dims && dims.maxWidth; const maxHeight = dims && dims.maxHeight;
   return (
     <h1 ref={heroRef} className="text-3xl sm:text-4xl md:text-5xl font-medium leading-[1.1] tracking-tight">
-      {t.hero.hello}
-      <br />
+      {t.hero.hello}<br />
       <span className="inline-block align-baseline relative" style={{ width: maxWidth ? (maxWidth + "px") : undefined, height: maxHeight ? (maxHeight + "px") : undefined, lineHeight: "inherit" }}>
         <span className="invisible whitespace-nowrap" style={{ lineHeight: "inherit" }}>
           Product Designer {lang === "fr" ? "chez" : "at"}
         </span>
         <span className="absolute left-0 top-0 whitespace-nowrap" style={{ lineHeight: "inherit" }}>
-          <span className={hovering ? "gradient-text" : ""} style={hovering ? { backgroundPosition: (bgX + "% 50%") } : { color: "currentColor" }}>
-            Product Designer
-          </span>
-          <span style={{ marginLeft: (typeof spacePx === "number") ? (spacePx + "px") : undefined }}>
-            {lang === "fr" ? "chez" : "at"}
-          </span>
+          <span className={hovering ? "gradient-text" : ""} style={hovering ? { backgroundPosition: (bgX + "% 50%") } : { color: "currentColor" }}>Product Designer</span>
+          <span style={{ marginLeft: (typeof spacePx === "number") ? (spacePx + "px") : undefined }}>{lang === "fr" ? "chez" : "at"}</span>
         </span>
-      </span>
-      <br />
+      </span><br />
       {t.hero.after}
     </h1>
   );
 }
 
 function TopRightControls({ lang, setLang, theme, setTheme }) {
-  var t = CONTENT[lang];
-  var [open, setOpen] = useState(false);
-  var tooltipRef = useRef(null);
-  useEffect(function(){
+  const t = CONTENT[lang];
+  const [open, setOpen] = useState(false);
+  const tooltipRef = useRef(null);
+  useEffect(() => {
     function onDocClick(e){ if (!tooltipRef.current) return; if (!tooltipRef.current.contains(e.target)) setOpen(false); }
     document.addEventListener("click", onDocClick);
-    return function(){ document.removeEventListener("click", onDocClick); };
+    return () => { document.removeEventListener("click", onDocClick); };
   }, []);
   return (
     <div className="relative flex items-center justify-end gap-3 text-xs opacity-80 hover:opacity-100 transition">
@@ -209,36 +183,57 @@ function TopRightControls({ lang, setLang, theme, setTheme }) {
   );
 }
 
-function Home({ lang, setLang, theme, setTheme }) {
-  var t = CONTENT[lang];
-  var [open, setOpen] = useState(null);
-  var [showAll, setShowAll] = useState(false);
+function useQueryState() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const params = new URLSearchParams(location.search);
+  const get = (key) => params.get(key);
+  const set = (obj) => {
+    const p = new URLSearchParams(location.search);
+    Object.entries(obj).forEach(([k,v]) => { if (v === null || v === undefined) p.delete(k); else p.set(k, String(v)); });
+    navigate({ pathname: "/", search: `?${p.toString()}` }, { replace: true });
+  };
+  return { get, set };
+}
 
-  var heroWrapRef = useRef(null);
-  var heroTextRef = useRef(null);
-  var [bgX, setBgX] = useState(0);
-  var [hovering, setHovering] = useState(false);
-  var [dims, setDims] = useState({ maxWidth: null, maxHeight: null });
-  var [spacePx, setSpacePx] = useState(0);
+function Home({ lang, setLang, theme, setTheme }) {
+  const t = CONTENT[lang];
+  const q = useQueryState();
+  const initialOpen = q.get("open") || null; // "projects" | "about" | null
+  const initialShow = q.get("show") === "all";
+  const [open, setOpen] = useState(initialOpen);
+  const [showAll, setShowAll] = useState(initialShow);
 
   useEffect(() => {
-    var phrasePD = "Product Designer";
-    var word = lang === "fr" ? "chez" : "at";
+    setOpen(q.get("open"));
+    setShowAll(q.get("show") === "all");
+  }, [q.get("open"), q.get("show")]);
+
+  const heroWrapRef = useRef(null);
+  const heroTextRef = useRef(null);
+  const [bgX, setBgX] = useState(0);
+  const [hovering, setHovering] = useState(false);
+  const [dims, setDims] = useState({ maxWidth: null, maxHeight: null });
+  const [spacePx, setSpacePx] = useState(0);
+
+  useEffect(() => {
+    const phrasePD = "Product Designer";
+    const word = lang === "fr" ? "chez" : "at";
     function measure(){
-      var system = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans', sans-serif";
-      var h = heroTextRef.current;
-      var cs = h ? window.getComputedStyle(h) : null;
-      var sizePx = cs ? Math.round(parseFloat(cs.fontSize) || 48) : 48;
-      var canvas = document.createElement("canvas");
-      var ctx = canvas.getContext("2d");
+      const system = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans', sans-serif";
+      const h = heroTextRef.current;
+      const cs = h ? window.getComputedStyle(h) : null;
+      const sizePx = cs ? Math.round(parseFloat(cs.fontSize) || 48) : 48;
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
       ctx.font = "500 " + sizePx + "px " + system;
-      var wPD = ctx.measureText(phrasePD).width;
-      var mAA = ctx.measureText("AA");
-      var mA_A = ctx.measureText("A A");
-      var space = Math.max(0, Math.round(mA_A.width - mAA.width));
+      const wPD = ctx.measureText(phrasePD).width;
+      const mAA = ctx.measureText("AA");
+      const mA_A = ctx.measureText("A A");
+      const space = Math.max(0, Math.round(mA_A.width - mAA.width));
       setSpacePx(space);
-      var ascent = ctx.measureText(phrasePD).actualBoundingBoxAscent || sizePx * 0.8;
-      var descent = ctx.measureText(phrasePD).actualBoundingBoxDescent || sizePx * 0.2;
+      const ascent = ctx.measureText(phrasePD).actualBoundingBoxAscent || sizePx * 0.8;
+      const descent = ctx.measureText(phrasePD).actualBoundingBoxDescent || sizePx * 0.2;
       setDims({ maxWidth: Math.ceil(wPD + space + ctx.measureText(word).width), maxHeight: Math.ceil(ascent + descent) });
     }
     measure(); window.addEventListener("resize", measure);
@@ -246,11 +241,23 @@ function Home({ lang, setLang, theme, setTheme }) {
   }, [lang]);
 
   function onMouseMoveHero(e){
-    var rect = heroWrapRef.current && heroWrapRef.current.getBoundingClientRect();
+    const rect = heroWrapRef.current && heroWrapRef.current.getBoundingClientRect();
     if (!rect) return;
-    var x = (e.clientX - rect.left) / rect.width;
-    var clamped = Math.max(0, Math.min(1, x));
+    const x = (e.clientX - rect.left) / rect.width;
+    const clamped = Math.max(0, Math.min(1, x));
     setBgX(Math.round(clamped * 100));
+  }
+
+  function toggleShowAll() {
+    const next = !showAll;
+    setShowAll(next);
+    q.set({ open: "projects", show: next ? "all" : null });
+  }
+
+  function openSection(name){
+    const next = (open === name) ? null : name;
+    setOpen(next);
+    q.set({ open: next || null, show: (next === "projects" && showAll) ? "all" : null });
   }
 
   return (
@@ -266,18 +273,18 @@ function Home({ lang, setLang, theme, setTheme }) {
           </div>
         </div>
 
-        <SectionRow label={t.labels.about} isOpen={open === "about"} onToggle={() => setOpen(open === "about" ? null : "about")}>
+        <SectionRow label={t.labels.about} isOpen={open === "about"} onToggle={() => openSection("about")}>
           <div className="grid grid-cols-1 items-start gap-10 sm:grid-cols-[minmax(150px,200px)_1fr]">
             <div className="pr-4">
-              <img src={t.about.photo} alt={"Portrait de " + t.about.name} className="photo-square ring-1 ring-black/10 dark:ring-white/10" />
+              <img src={CONTENT[lang].about.photo} alt={"Portrait de " + CONTENT[lang].about.name} className="photo-square ring-1 ring-black/10 dark:ring-white/10" />
             </div>
             <div className="space-y-8">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">{t.about.name}</h2>
-                <p className="mt-1 text-sm sm:text-base text-black/60 dark:text-white/60">{t.about.role}</p>
+                <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">{CONTENT[lang].about.name}</h2>
+                <p className="mt-1 text-sm sm:text-base text-black/60 dark:text-white/60">{CONTENT[lang].about.role}</p>
               </div>
               <div className="space-y-4">
-                {t.about.bio.map((p, i) => (
+                {CONTENT[lang].about.bio.map((p, i) => (
                   <p key={i} className="max-w-prose text-sm sm:text-[1.02rem] leading-relaxed text-black/80 dark:text-white/80">{p}</p>
                 ))}
               </div>
@@ -285,17 +292,17 @@ function Home({ lang, setLang, theme, setTheme }) {
                 <button onClick={() => { try { var a = atob(EMAIL_B64); window.location.href = "mailto:" + a; } catch(e){} }} className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition bg-white/90 dark:bg-white/5 backdrop-blur">
                   <Mail size={16} /> {t.labels.sayHello}
                 </button>
-                <a href={t.about.contact.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition bg-white/90 dark:bg-white/5 backdrop-blur">
+                <a href={CONTENT[lang].about.contact.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition bg-white/90 dark:bg-white/5 backdrop-blur">
                   <Linkedin size={16} /> LinkedIn
                 </a>
-                <a href={"tel:+33" + (t.about.contact.phone || "").replace(/\D/g,'')} className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition bg-white/90 dark:bg-white/5 backdrop-blur">
-                  <Phone size={16} /> {t.about.contact.phone}
+                <a href={"tel:+33" + (CONTENT[lang].about.contact.phone || "").replace(/\D/g,'')} className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition bg-white/90 dark:bg-white/5 backdrop-blur">
+                  <Phone size={16} /> {CONTENT[lang].about.contact.phone}
                 </a>
               </div>
               <div>
                 <h3 className="mb-2 text-base font-medium">{t.labels.previousWork}</h3>
                 <ul className="space-y-1 text-sm text-black/70 dark:text-white/70">
-                  {t.about.previousWork.map((line, idx) => (<li key={idx}>• {line}</li>))}
+                  {CONTENT[lang].about.previousWork.map((line, idx) => (<li key={idx}>• {line}</li>))}
                 </ul>
               </div>
             </div>
@@ -305,16 +312,16 @@ function Home({ lang, setLang, theme, setTheme }) {
         <SectionRow
           label={t.labels.projects}
           rightAdornment={open === "projects" ? (
-            <button onClick={() => setShowAll(!showAll)} className="text-sm underline-offset-4 hover:underline">
+            <button onClick={toggleShowAll} className="text-sm underline-offset-4 hover:underline">
               {showAll ? t.labels.seeLess : t.labels.seeAll}
             </button>
           ) : null}
           isOpen={open === "projects"}
-          onToggle={() => setOpen(open === "projects" ? null : "projects")}
+          onToggle={() => openSection("projects")}
         >
           <div className="space-y-6">
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {(t.projects || []).slice(0,4).map((p) => (
+              {(CONTENT[lang].projects || []).slice(0,4).map((p) => (
                 <div key={p.id}>
                   <Link to={"/projects/" + p.id} className="group block overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 shadow-sm ring-1 ring-black/5 dark:ring-white/5 transition bg-white dark:bg-neutral-900">
                     <img src={p.image} alt={"aperçu " + p.title} className="aspect-[4/3] w-full object-cover" />
@@ -327,7 +334,7 @@ function Home({ lang, setLang, theme, setTheme }) {
               ))}
             </div>
 
-            <Extras show={showAll} items={(t.projects || []).slice(4)} />
+            <Extras show={showAll} items={(CONTENT[lang].projects || []).slice(4)} />
           </div>
         </SectionRow>
       </div>
@@ -418,44 +425,67 @@ function Extras({ show, items }){
 }
 
 function ProjectPage({ lang }) {
-  var t = CONTENT[lang];
-  var navigate = useNavigate();
-  var params = useParams();
-  var id = params.id;
-  var project = (t.projects || []).find(p => p.id === id);
+  const t = CONTENT[lang];
+  const navigate = useNavigate();
+  const params = useParams();
+  const id = params.id;
+  const list = (t.projects || []);
+  const index = Math.max(0, list.findIndex(p => p.id === id));
+  const project = list[index];
+
   if (!project) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-16">
-        <button onClick={() => navigate(-1)} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
+        <button onClick={() => navigate('/?open=projects&show=all')} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
           <ChevronLeft size={16} /> {t.labels.back}
         </button>
         <p>Not found.</p>
       </div>
     );
   }
+
+  const prev = index > 0 ? list[index-1] : null;
+  const next = index < list.length-1 ? list[index+1] : null;
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-16">
-      <button onClick={() => navigate(-1)} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
+      <button onClick={() => navigate('/?open=projects&show=all')} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
         <ChevronLeft size={16} /> {t.labels.back}
       </button>
+
       <h1 className="text-3xl font-semibold tracking-tight">{project.title}</h1>
       {project.subtitle ? <h2 className="mt-2 text-lg text-black/70 dark:text-white/70">{project.subtitle}</h2> : null}
       {project.summary ? <p className="mt-2 text-black/60 dark:text-white/60">{project.summary}</p> : null}
       {project.image ? <img src={project.image} alt="aperçu" className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover ring-1 ring-black/10 dark:ring-white/10" /> : null}
       <div className="prose prose-neutral dark:prose-invert max-w-none mt-6">
-        {Array.isArray(project.description)
-          ? project.description.map((para, idx) => <p key={idx}>{para}</p>)
-          : <p>{project.description || ""}</p>}
+        {Array.isArray(project.description) ? project.description.map((para, idx) => <p key={idx}>{para}</p>) : <p>{project.description || ""}</p>}
+      </div>
+
+      <div className="mt-10 flex items-center justify-between gap-3">
+        <div>
+          {prev ? (
+            <Link to={"/projects/" + prev.id} className="inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
+              ← {t.labels.prev}
+            </Link>
+          ) : <span></span>}
+        </div>
+        <div>
+          {next ? (
+            <Link to={"/projects/" + next.id} className="inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
+              {t.labels.next} →
+            </Link>
+          ) : <span></span>}
+        </div>
       </div>
     </div>
   );
 }
 
 export default function App() {
-  var [lang, setLang] = useState(getInitialLang());
-  var [theme, setTheme] = useState(getInitialTheme());
+  const [lang, setLang] = useState(getInitialLang());
+  const [theme, setTheme] = useState(getInitialTheme());
   useEffect(() => { localStorage.setItem("lang", lang); }, [lang]);
-  useEffect(() => { localStorage.setItem("theme", theme); var r = document.documentElement; if (theme === "dark") r.classList.add("dark"); else r.classList.remove("dark"); }, [theme]);
+  useEffect(() => { localStorage.setItem("theme", theme); const r = document.documentElement; if (theme === "dark") r.classList.add("dark"); else r.classList.remove("dark"); }, [theme]);
 
   return (
     <HashRouter>
