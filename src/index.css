@@ -18,6 +18,40 @@ html { scroll-behavior: smooth; }
   color: transparent;
 }
 
+/* Splash */
+.splash {
+  position: fixed; inset: 0; z-index: 50;
+  display: flex; align-items: center; justify-content: center;
+  background: white; color: #111827;
+  transition: opacity 420ms cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
+}
+.dark .splash { background: #0a0a0a; color: white; }
+.splash.hide { opacity: 0; }
+
+.splash-word {
+  font-size: clamp(40px, 8vw, 96px);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  transform: translateY(0);
+  transition: transform 580ms cubic-bezier(.22,1,.36,1);
+}
+.splash.relocate .splash-word { transform: translateY(40vh); }
+
+.splash-reveal {
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: bottom;
+}
+.splash-reveal > span {
+  display: inline-block;
+  transform: translateY(100%);
+  animation: rise 800ms cubic-bezier(.22,1,.36,1) forwards;
+}
+@keyframes rise {
+  to { transform: translateY(0%); }
+}
+
 /* Accordion */
 .accordion {
   overflow: hidden;
@@ -94,7 +128,6 @@ html { scroll-behavior: smooth; }
 .p-card:hover::before { opacity: 1; background-position: 100% 0%; }
 .p-card:hover { transform: translateY(-1px); }
 
-/* One-line text inside card */
 .p-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-title { font-weight: 400; font-size: 0.97rem; }
 .p-sep { opacity: .35; padding: 0 6px; }
@@ -102,7 +135,6 @@ html { scroll-behavior: smooth; }
 
 @media (max-width: 380px) { .p-line { white-space: normal; } }
 
-/* Stagger entrance */
 .p-list .p-card { opacity: 0; transform: translateY(10px) scale(.985); filter: blur(6px); }
 .p-list.ready .p-card {
   opacity: 1;
@@ -115,6 +147,7 @@ html { scroll-behavior: smooth; }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .splash, .splash-word { transition: none !important; animation: none !important; }
   .accordion { transition: none !important; height: auto !important; clip-path: none !important; filter: none !important; opacity: 1 !important; }
   .accordion-inner { transition: none !important; opacity: 1 !important; transform: none !important; }
   .p-list .p-card { transition: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }

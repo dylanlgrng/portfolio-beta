@@ -8,12 +8,12 @@ const EMAIL_B64 = "bGFncmFuZ2VkeWxhbkBnbWFpbC5jb20="; // lagrangedylan@gmail.com
 const GENERIC_BODY = {
   fr: [
     "Texte d’exemple : présentez le contexte (problème, public, objectifs) et votre rôle (recherche, ateliers, prototypage, tests, cadrage technique…).",
-    "Expliquez les décisions clés : contraintes rencontrées, arbitrages UX/UI, accessibilité, performance, éco‑conception.",
+    "Expliquez les décisions clés : contraintes rencontrées, arbitrages UX/UI, accessibilité, performance, éco-conception.",
     "Résultats & impact : indicateurs avant/après, retours utilisateurs, apprentissages et suites du projet."
   ],
   en: [
     "Placeholder text: outline the context (problem, audience, goals) and your role (research, workshops, prototyping, testing, technical framing…).",
-    "Explain key decisions: constraints, UX/UI trade‑offs, accessibility, performance and eco‑design considerations.",
+    "Explain key decisions: constraints, UX/UI trade-offs, accessibility, performance and eco-design considerations.",
     "Outcomes & impact: before/after metrics, user feedback, learnings, and next steps."
   ]
 };
@@ -71,12 +71,11 @@ const CONTENT = {
   }
 };
 
-// Seed projects with local hero images users can replace later
 function seed(lang) {
   const arr = CONTENT[lang].projects;
   arr.push({ id:"maif",
     title: lang==="fr" ? "MAIF — Outils métiers & design system" : "MAIF — Internal tools & design system",
-    subtitle: lang==="fr" ? "Mission en cours (UX‑Republic → MAIF)" : "Ongoing assignment (UX‑Republic → MAIF)",
+    subtitle: lang==="fr" ? "Mission en cours (UX-Republic → MAIF)" : "Ongoing assignment (UX-Republic → MAIF)",
     summary: lang==="fr" ? "Évolution d’outils métiers, design system, accessibilité." : "Internal tools, design system, accessibility.",
     image:"/images/projects/maif.svg", hero:"/images/projects/maif.svg"
   });
@@ -94,9 +93,14 @@ function seed(lang) {
 }
 seed("fr"); seed("en");
 
-// Lang + Theme
-function getInitialLang(){ return (localStorage.getItem("lang") === "en") ? "en" : "fr"; }
-function getInitialTheme(){ const s = localStorage.getItem("theme"); if (s === "dark" || s === "light") return s; const h = new Date().getHours(); return (h >= 7 && h < 19) ? "light" : "dark"; }
+// Theme helpers
+function getInitialTheme(){
+  const saved = localStorage.getItem("theme");
+  if (saved === "light" || saved === "dark") return saved;
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  return prefersDark ? "dark" : "light";
+}
+function getThemeOverride(){ return localStorage.getItem("theme_override") === "1"; }
 
 // Query helper (to reopen section on back)
 function useQueryState() {
@@ -112,7 +116,6 @@ function useQueryState() {
   return { get, set };
 }
 
-// Accordion row
 function SectionRow({ label, rightAdornment, isOpen, onToggle, children }) {
   const boxRef = useRef(null);
   const innerRef = useRef(null);
@@ -181,7 +184,6 @@ function SectionRow({ label, rightAdornment, isOpen, onToggle, children }) {
   );
 }
 
-// Hero title (lighter weights)
 function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang }) {
   const t = CONTENT[lang];
   const maxWidth = dims && dims.maxWidth; const maxHeight = dims && dims.maxHeight;
@@ -202,9 +204,7 @@ function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang }) {
   );
 }
 
-// Top-right controls
 function TopRightControls({ lang, setLang, theme, setTheme, onLangFX }) {
-  const t = CONTENT[lang];
   const [open, setOpen] = useState(false);
   const tooltipRef = useRef(null);
   useEffect(() => {
@@ -212,12 +212,13 @@ function TopRightControls({ lang, setLang, theme, setTheme, onLangFX }) {
     document.addEventListener("click", onDocClick);
     return () => { document.removeEventListener("click", onDocClick); };
   }, []);
+  const t = CONTENT[lang];
   return (
     <div className="relative flex items-center justify-end gap-3 text-xs opacity-80 hover:opacity-100 transition">
       <button onClick={() => { setLang(lang === "fr" ? "en" : "fr"); onLangFX(); }} className="rounded-full border border-black/10 dark:border-white/10 px-2 py-1 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
         {lang === "fr" ? "EN" : "FR"}
       </button>
-      <button onClick={() => setTheme(theme === "dark" ? "light" : "dark")} className="rounded-full border border-black/10 dark:border-white/10 p-1.5 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
+      <button onClick={() => { setTheme(theme === "dark" ? "light" : "dark"); localStorage.setItem("theme_override","1"); }} className="rounded-full border border-black/10 dark:border-white/10 p-1.5 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
         {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
       </button>
       <div ref={tooltipRef} className="relative">
@@ -234,7 +235,6 @@ function TopRightControls({ lang, setLang, theme, setTheme, onLangFX }) {
   );
 }
 
-// Re-stagger animation when projects section opens
 function ProjectCards({ items, animateKey }){
   const listRef = useRef(null);
   useEffect(() => {
@@ -262,12 +262,40 @@ function ProjectCards({ items, animateKey }){
   );
 }
 
+function useSystemThemeSync(enabled){
+  useEffect(() => {
+    if (!enabled) return;
+    const mm = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+    if (!mm) return;
+    function onChange(e){
+      const next = e.matches ? "dark" : "light";
+      document.documentElement.classList.toggle("dark", next === "dark");
+      localStorage.setItem("theme", next);
+    }
+    mm.addEventListener ? mm.addEventListener("change", onChange) : mm.addListener(onChange);
+    return () => {
+      mm.removeEventListener ? mm.removeEventListener("change", onChange) : mm.removeListener(onChange);
+    };
+  }, [enabled]);
+}
+
 function Home({ lang, setLang, theme, setTheme }) {
   const t = CONTENT[lang];
   const q = useQueryState();
   const initialOpen = q.get("open") || null;
   const [open, setOpen] = useState(initialOpen);
   useEffect(() => { setOpen(q.get("open")); }, [q.get("open")]);
+
+  // Splash animation states
+  const [splash, setSplash] = useState(true);
+  const [relocate, setRelocate] = useState(false);
+  useEffect(() => {
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) { setSplash(false); return; }
+    const t1 = setTimeout(() => setRelocate(true), 900);
+    const t2 = setTimeout(() => setSplash(false), 1600);
+    return () => { clearTimeout(t1); clearTimeout(t2); };
+  }, []);
 
   const [langFx, setLangFx] = useState(false);
   function triggerLangFX(){ setLangFx(true); setTimeout(() => setLangFx(false), 280); }
@@ -334,11 +362,20 @@ function Home({ lang, setLang, theme, setTheme }) {
 
   return (
     <main className={"theme-shell flex min-h-dvh flex-col bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100"} style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans', sans-serif" }}>
+      {/* Splash overlay */}
+      {splash ? (
+        <div className={"splash" + (relocate ? " relocate" : "")}>
+          <div className="splash-reveal">
+            <span className="splash-word">{lang === "fr" ? "Bonjour" : "Hi"}</span>
+          </div>
+        </div>
+      ) : null}
+
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 pt-4">
         <TopRightControls lang={lang} setLang={setLang} theme={theme} setTheme={setTheme} onLangFX={triggerLangFX} />
       </div>
 
-      <div className="mx-auto mt-auto w-full max-w-6xl px-4 sm:px-6">
+      <div className={"mx-auto mt-auto w-full max-w-6xl px-4 sm:px-6 " + (splash ? "opacity-0" : "opacity-100 transition-opacity duration-500")}>
         <div ref={heroWrapRef} className={"pb-4 select-none " + (langFx ? "lang-fx" : "")} onMouseEnter={() => setHovering(true)} onMouseMove={onMouseMoveHero} onMouseLeave={() => setHovering(false)}>
           <div ref={heroTextRef}>
             <IntroTitle lang={lang} hovering={hovering} bgX={bgX} dims={dims} spacePx={spacePx} heroRef={heroTextRef} />
@@ -401,15 +438,12 @@ function ProjectPage({ lang }) {
       {project.subtitle ? <h2 className="mt-2 text-lg text-black/70 dark:text-white/70">{project.subtitle}</h2> : null}
       {project.summary ? <p className="mt-2 text-black/60 dark:text-white/60">{project.summary}</p> : null}
 
-      {/* Large hero image */}
       <img src={project.hero || project.image} alt="aperçu" className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover ring-1 ring-black/10 dark:ring-white/10" />
 
-      {/* Generic body text */}
       <div className="prose prose-neutral dark:prose-invert max-w-none mt-8">
         {body.map((p,i)=>(<p key={i}>{p}</p>))}
       </div>
 
-      {/* Prev / Next */}
       <div className="mt-10 flex items-center justify-between gap-3">
         <div>
           {prev ? (
@@ -431,21 +465,27 @@ function ProjectPage({ lang }) {
 }
 
 export default function App() {
-  const [lang, setLang] = useState(getInitialLang());
+  const [lang, setLang] = useState(localStorage.getItem("lang") === "en" ? "en" : "fr");
   const [theme, setTheme] = useState(getInitialTheme());
+  const [override, setOverride] = useState(getThemeOverride());
+
   useEffect(() => { localStorage.setItem("lang", lang); }, [lang]);
+
   useEffect(() => {
     localStorage.setItem("theme", theme);
     const r = document.documentElement;
-    if (theme === "dark") r.classList.add("dark"); else r.classList.remove("dark");
+    r.classList.toggle("dark", theme === "dark");
   }, [theme]);
+
+  // Sync with system when there is no manual override
+  useSystemThemeSync(!override);
 
   return (
     <HashRouter>
       <Routes>
-        <Route path="/" element={<Home lang={lang} setLang={setLang} theme={theme} setTheme={setTheme} />} />
+        <Route path="/" element={<Home lang={lang} setLang={setLang} theme={theme} setTheme={(t)=>{ setTheme(t); setOverride(true); localStorage.setItem("theme_override","1"); }} />} />
         <Route path="/projects/:id" element={<ProjectPage lang={lang} />} />
-        <Route path="*" element={<Home lang={lang} setLang={setLang} theme={theme} setTheme={setTheme} />} />
+        <Route path="*" element={<Home lang={lang} setLang={setLang} theme={theme} setTheme={(t)=>{ setTheme(t); setOverride(true); localStorage.setItem("theme_override","1"); }} />} />
       </Routes>
     </HashRouter>
   );
