@@ -3,7 +3,8 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-html { scroll-behavior: smooth; }
+html { -webkit-tap-highlight-color: transparent; }
+
 .theme-shell { @apply transition-colors duration-500; }
 
 .gradient-text {
@@ -17,129 +18,63 @@ html { scroll-behavior: smooth; }
   color: transparent;
 }
 
-/* Splash overlay matching hero position */
-.splash {
-  position: fixed; inset: 0; z-index: 50;
-  background: white; color: #111827;
-  pointer-events: none;
+/* First-load intro: hero first, rest fades in */
+.intro-rest {
+  opacity: 0; transform: translateY(6px);
+  transition: opacity 420ms ease, transform 420ms cubic-bezier(.22,1,.36,1);
+  will-change: opacity, transform;
 }
-.dark .splash { background: #0a0a0a; color: white; }
-.splash-word {
-  position: absolute;
-  font-weight: 400;
-  letter-spacing: -0.02em;
-  transform: translate3d(0,0,0);
-  transition: transform 600ms cubic-bezier(.22,1,.36,1), opacity 400ms ease;
-  will-change: transform;
-}
-.splash-hide { opacity: 0; transition: opacity 360ms ease; }
+.intro-rest.visible { opacity: 1; transform: translateY(0); }
 
-.type-caret {
-  display: inline-block; width: .6ch; margin-left: 2px;
-  border-right: 2px solid currentColor;
-  animation: blink 1s step-end infinite;
-  vertical-align: baseline;
-}
-@keyframes blink { 50% { border-color: transparent; } }
-
-/* Accordion */
+/* Accordion: keep it light for iOS (no blur/clip-path) */
 .accordion {
   overflow: hidden;
   height: 0;
   opacity: 0;
-  filter: blur(6px);
-  clip-path: inset(0% 0% 100% 0%);
-  will-change: height, opacity, filter, clip-path;
   transition:
-    height 520ms cubic-bezier(.22,1,.36,1),
-    opacity 360ms cubic-bezier(.22,1,.36,1),
-    filter 360ms cubic-bezier(.22,1,.36,1),
-    clip-path 520ms cubic-bezier(.22,1,.36,1);
+    height 420ms cubic-bezier(.22,1,.36,1),
+    opacity 300ms ease;
+  will-change: height, opacity;
 }
-.accordion.open { 
-  opacity: 1; 
-  filter: blur(0); 
-  clip-path: inset(0% 0% 0% 0%);
-  overflow: visible;
-}
+.accordion.open { opacity: 1; }
+
 .accordion-inner {
   opacity: 0;
-  transform: translateY(8px) scale(0.995);
-  will-change: opacity, transform;
+  transform: translateY(6px);
   transition:
-    opacity 360ms cubic-bezier(.22,1,.36,1),
-    transform 360ms cubic-bezier(.22,1,.36,1);
+    opacity 320ms ease,
+    transform 320ms cubic-bezier(.22,1,.36,1);
+  will-change: opacity, transform;
 }
-.accordion.open .accordion-inner { opacity: 1; transform: translateY(0) scale(1); }
+.accordion.open .accordion-inner { opacity: 1; transform: translateY(0); }
 
-.lang-fx { animation: langfade .28s ease both; }
-@keyframes langfade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-/* Project list — full-width single column cards */
+/* Project list — full width cards */
 .p-list { display: grid; grid-template-columns: 1fr; gap: 8px; }
-
 .p-card {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
-  border-radius: 10px;
+  position: relative; display:flex; align-items:center; width:100%;
+  min-height:44px; padding:10px 12px; border-radius:10px;
   background: rgb(255 255 255 / 0.9);
   border: 1px solid rgb(0 0 0 / 0.08);
-  transition:
-    background 200ms ease,
-    transform 220ms cubic-bezier(.22,1,.36,1),
-    border-color 220ms ease;
-  overflow: hidden;
+  transition: background 180ms ease, transform 200ms cubic-bezier(.22,1,.36,1), border-color 200ms ease;
 }
-.dark .p-card {
-  background: rgb(255 255 255 / 0.05);
-  border-color: rgb(255 255 255 / 0.12);
-}
-
-.p-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(120deg, transparent 0%, rgba(0,0,0,.06) 50%, transparent 100%);
-  background-size: 200% 100%;
-  background-position: 0% 0%;
-  opacity: 0;
-  transition:
-    opacity 200ms ease,
-    background-position 700ms cubic-bezier(.22,1,.36,1);
-  pointer-events: none;
-}
-.dark .p-card::before {
-  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.10) 50%, transparent 100%);
-}
-.p-card:hover::before { opacity: 1; background-position: 100% 0%; }
+.dark .p-card { background: rgb(255 255 255 / 0.05); border-color: rgb(255 255 255 / 0.12); }
 .p-card:hover { transform: translateY(-1px); }
-
 .p-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .p-title { font-weight: 400; font-size: 0.97rem; }
 .p-sep { opacity: .35; padding: 0 6px; }
 .p-sub { font-size: .94rem; opacity: .8; font-weight: 300; }
-
 @media (max-width: 380px) { .p-line { white-space: normal; } }
 
-.p-list .p-card { opacity: 0; transform: translateY(10px) scale(.985); filter: blur(6px); }
+/* Cards entrance */
+.p-list .p-card { opacity: 0; transform: translateY(8px) scale(.99); }
 .p-list.ready .p-card {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  filter: none;
-  transition:
-    opacity 360ms cubic-bezier(.22,1,.36,1) var(--d, 0ms),
-    transform 360ms cubic-bezier(.22,1,.36,1) var(--d, 0ms),
-    filter 360ms cubic-bezier(.22,1,.36,1) var(--d, 0ms);
+  opacity: 1; transform: translateY(0) scale(1);
+  transition: opacity 320ms ease var(--d,0ms), transform 320ms cubic-bezier(.22,1,.36,1) var(--d,0ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .splash, .splash-word { transition: none !important; animation: none !important; }
-  .accordion { transition: none !important; height: auto !important; clip-path: none !important; filter: none !important; opacity: 1 !important; }
+  .intro-rest { transition: none !important; opacity: 1 !important; transform: none !important; }
+  .accordion { transition: none !important; height: auto !important; opacity: 1 !important; }
   .accordion-inner { transition: none !important; opacity: 1 !important; transform: none !important; }
-  .p-list .p-card { transition: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
-  .p-card::before { transition: none !important; }
+  .p-list .p-card, .p-list.ready .p-card { transition:none !important; opacity:1 !important; transform:none !important; }
 }

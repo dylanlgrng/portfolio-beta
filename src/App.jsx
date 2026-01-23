@@ -184,27 +184,21 @@ function SectionRow({ label, rightAdornment, isOpen, onToggle, children }) {
   );
 }
 
-function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang, bonjourRef, hideFirstWord, typedText, showCaret }) {
+function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang }) {
   const t = CONTENT[lang];
-  const hello = t.hero.hello;
-  const parts = hello.split(" ");
-  const first = parts.shift();
-  const rest = parts.join(" ");
   const maxWidth = dims && dims.maxWidth; const maxHeight = dims && dims.maxHeight;
   return (
     <h1 ref={heroRef} className="text-[1.45rem] sm:text-[1.7rem] md:text-[2rem] font-normal leading-[1.14] tracking-tight">
-      <span className={hideFirstWord ? "invisible" : ""} ref={bonjourRef}>{first}</span>{rest ? " " : ""}
-      {typedText !== null ? <span>{typedText}{showCaret ? <span className="type-caret" /> : null}</span> : <span>{rest}</span>}
+      {t.hero.hello}
       <br />
       <span className="inline-block align-baseline relative" style={{ width: maxWidth ? (maxWidth + "px") : undefined, height: maxHeight ? (maxHeight + "px") : undefined, lineHeight: "inherit" }}>
-        <span className="invisible whitespace-nowrap" style={{ lineHeight: "inherit" }}>
-          Product Designer {lang === "fr" ? "chez" : "at"}
-        </span>
+        <span className="invisible whitespace-nowrap" style={{ lineHeight: "inherit" }}>Product Designer {lang === "fr" ? "chez" : "at"}</span>
         <span className="absolute left-0 top-0 whitespace-nowrap" style={{ lineHeight: "inherit" }}>
           <span className={hovering ? "gradient-text" : ""} style={hovering ? { backgroundPosition: (bgX + "% 50%") } : { color: "currentColor" }}>Product Designer</span>
           <span style={{ marginLeft: (typeof spacePx === "number") ? (spacePx + "px") : undefined }}>{lang === "fr" ? "chez" : "at"}</span>
         </span>
-      </span><br />
+      </span>
+      <br />
       {t.hero.after}
     </h1>
   );
@@ -221,7 +215,7 @@ function TopRightControls({ lang, setLang, theme, setTheme, onLangFX }) {
   const t = CONTENT[lang];
   return (
     <div className="relative flex items-center justify-end gap-3 text-xs opacity-80 hover:opacity-100 transition">
-      <button onClick={() => { setLang(lang === "fr" ? "en" : "fr"); onLangFX(); }} className="rounded-full border border-black/10 dark:border-white/10 px-2 py-1 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
+      <button onClick={() => { setLang(lang === "fr" ? "en" : "fr"); onLangFX && onLangFX(); }} className="rounded-full border border-black/10 dark:border-white/10 px-2 py-1 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
         {lang === "fr" ? "EN" : "FR"}
       </button>
       <button onClick={() => { setTheme(theme === "dark" ? "light" : "dark"); localStorage.setItem("theme_override","1"); }} className="rounded-full border border-black/10 dark:border-white/10 p-1.5 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
@@ -292,37 +286,28 @@ function Home({ lang, setLang, theme, setTheme }) {
   const [open, setOpen] = useState(initialOpen);
   useEffect(() => { setOpen(q.get("open")); }, [q.get("open")]);
 
-  // Intro typing + splash states
-  const [splashVisible, setSplashVisible] = useState(false);
-  const [splashHide, setSplashHide] = useState(false);
-  const [splashPos, setSplashPos] = useState({ top: 0, left: 0, fontSize: 24 });
-  const [moveDown, setMoveDown] = useState(false);
-  const [typedText, setTypedText] = useState(null);
-  const [showCaret, setShowCaret] = useState(false);
-  const [hideFirstWord, setHideFirstWord] = useState(false);
-
-  // Skip intro on return (session)
+  // First-load intro: show hero immediately, rest fades in once
+  const [restVisible, setRestVisible] = useState(true);
   useEffect(() => {
     const seen = sessionStorage.getItem("intro_seen") === "1";
-    if (seen) {
-      setSplashVisible(false);
-      setTypedText(null);
-    } else {
-      setSplashVisible(true);
-      setHideFirstWord(true);
+    if (!seen) {
+      setRestVisible(false);
+      const t = setTimeout(() => {
+        setRestVisible(true);
+        sessionStorage.setItem("intro_seen","1");
+      }, 450); // subtle delay
+      return () => clearTimeout(t);
     }
   }, []);
 
-  // Hero hover gradient position
+  // Hero hover gradient
   const heroWrapRef = useRef(null);
   const heroTextRef = useRef(null);
-  const bonjourRef = useRef(null);
   const [bgX, setBgX] = useState(0);
   const [hovering, setHovering] = useState(false);
   const [dims, setDims] = useState({ maxWidth: null, maxHeight: null });
   const [spacePx, setSpacePx] = useState(0);
 
-  // Measure hero for spacing + splash placement
   useEffect(() => {
     const phrasePD = "Product Designer";
     const word = lang === "fr" ? "chez" : "at";
@@ -342,62 +327,10 @@ function Home({ lang, setLang, theme, setTheme }) {
       const ascent = ctx.measureText(phrasePD).actualBoundingBoxAscent || sizePx * 0.8;
       const descent = ctx.measureText(phrasePD).actualBoundingBoxDescent || sizePx * 0.2;
       setDims({ maxWidth: Math.ceil(wPD + space + ctx.measureText(word).width), maxHeight: Math.ceil(ascent + descent) });
-
-      // Splash position measurement
-      if (bonjourRef.current) {
-        const r = bonjourRef.current.getBoundingClientRect();
-        const cs2 = window.getComputedStyle(bonjourRef.current);
-        setSplashPos({ top: r.top + window.scrollY, left: r.left + window.scrollX, fontSize: parseFloat(cs2.fontSize) || sizePx });
-      }
     }
     measure(); window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [lang]);
-
-  // Kick intro sequence if needed
-  useEffect(() => {
-    if (!splashVisible) return;
-    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    // Start sequence after first layout
-    const t1 = setTimeout(() => {
-      setMoveDown(true); // descend animation
-      if (!reduce) {
-        // Start typing rest of sentence shortly after move begins
-        const hello = CONTENT[lang].hero.hello;
-        const parts = hello.split(" ");
-        parts.shift(); // remove first word
-        const rest = parts.join(" ");
-        setTypedText("");
-        setShowCaret(true);
-        let i = 0;
-        const speed = 22; // ms per char
-        const timer = setInterval(() => {
-          i++;
-          setTypedText(rest.slice(0, i));
-          if (i >= rest.length) {
-            clearInterval(timer);
-            setShowCaret(false);
-            // fade splash away
-            setTimeout(() => {
-              setSplashHide(true);
-              setTimeout(() => {
-                setSplashVisible(false);
-                setHideFirstWord(false);
-                sessionStorage.setItem("intro_seen","1");
-              }, 380);
-            }, 200);
-          }
-        }, speed);
-      } else {
-        // Reduced motion: skip typing
-        setTypedText(null);
-        setSplashVisible(false);
-        setHideFirstWord(false);
-        sessionStorage.setItem("intro_seen","1");
-      }
-    }, 200); // small delay to ensure measurements stable
-    return () => clearTimeout(t1);
-  }, [splashVisible, lang]);
 
   function onMouseMoveHero(e){
     const rect = heroWrapRef.current && heroWrapRef.current.getBoundingClientRect();
@@ -427,65 +360,37 @@ function Home({ lang, setLang, theme, setTheme }) {
     </p>
   );
 
-  const helloParts = CONTENT[lang].hero.hello.split(" ");
-  const firstWord = helloParts[0];
-
   return (
     <main className={"theme-shell flex min-h-dvh flex-col bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100"} style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans', sans-serif" }}>
-      {/* Splash overlay */}
-      {splashVisible ? (
-        <div className={"splash" + (splashHide ? " splash-hide" : "")}>
-          <div
-            className="splash-word"
-            style={{
-              top: splashPos.top + (moveDown ? 28 : 0),
-              left: splashPos.left,
-              fontSize: splashPos.fontSize,
-            }}
-          >
-            {firstWord}
-          </div>
-        </div>
-      ) : null}
-
-      <div className={"mx-auto w-full max-w-6xl px-4 sm:px-6 pt-4"}>
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 pt-4">
         <TopRightControls lang={lang} setLang={setLang} theme={theme} setTheme={setTheme} onLangFX={()=>{}} />
       </div>
 
-      <div className={"mx-auto mt-auto w-full max-w-6xl px-4 sm:px-6 " + (splashVisible && !splashHide ? "opacity-0" : "opacity-100 transition-opacity duration-500")}>
+      <div className="mx-auto mt-auto w-full max-w-6xl px-4 sm:px-6">
         <div ref={heroWrapRef} className={"pb-4 select-none"} onMouseEnter={() => setHovering(true)} onMouseMove={onMouseMoveHero} onMouseLeave={() => setHovering(false)}>
-          <div ref={heroTextRef}>
-            <IntroTitle
-              lang={lang}
-              hovering={hovering}
-              bgX={bgX}
-              dims={dims}
-              spacePx={spacePx}
-              heroRef={heroTextRef}
-              bonjourRef={bonjourRef}
-              hideFirstWord={hideFirstWord}
-              typedText={typedText}
-              showCaret={showCaret}
-            />
+          <div ref={heroTextRef} className="opacity-0 animate-[fadein_.45s_ease_forwards] [@keyframes_fadein]{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}">
+            <IntroTitle lang={lang} hovering={hovering} bgX={bgX} dims={dims} spacePx={spacePx} heroRef={heroTextRef} />
           </div>
         </div>
 
-        <SectionRow label={t.labels.about} isOpen={open === "about"} onToggle={() => openSection("about")}>
-          <div className="space-y-3 max-w-[500px]">
-            <div className="text-[0.98rem] leading-tight">
-              <div className="text-neutral-800 dark:text-neutral-200">{CONTENT[lang].about.headerName}</div>
-              <div className="text-neutral-500 dark:text-neutral-400">{CONTENT[lang].about.headerUpdated}</div>
+        <div className={"intro-rest " + (restVisible ? "visible" : "")}>
+          <SectionRow label={t.labels.about} isOpen={open === "about"} onToggle={() => openSection("about")}>
+            <div className="space-y-3 max-w-[500px]">
+              <div className="text-[0.98rem] leading-tight">
+                <div className="text-neutral-800 dark:text-neutral-200">{CONTENT[lang].about.headerName}</div>
+                <div className="text-neutral-500 dark:text-neutral-400">{CONTENT[lang].about.headerUpdated}</div>
+              </div>
+              {CONTENT[lang].about.paragraphs.map((p, i) => (
+                <p key={i} className="text-[0.98rem] leading-relaxed text-black/80 dark:text-white/80">{p}</p>
+              ))}
+              <ContactLine />
             </div>
-            {CONTENT[lang].about.paragraphs.map((p, i) => (
-              <p key={i} className="text-[0.98rem] leading-relaxed text-black/80 dark:text-white/80">{p}</p>
-            ))}
-            <ContactLine />
-          </div>
-        </SectionRow>
+          </SectionRow>
 
-        <SectionRow label={t.labels.projects} isOpen={open === "projects"} onToggle={() => openSection("projects")}>
-          <ProjectCards items={CONTENT[lang].projects || []} animateKey={open === "projects" ? "open" : "closed"} />
-        </SectionRow>
+          <SectionRow label={t.labels.projects} isOpen={open === "projects"} onToggle={() => openSection("projects")}>
+            <ProjectCards items={CONTENT[lang].projects || []} animateKey={open === "projects" ? "open" : "closed"} />
+          </SectionRow>
+        </div>
       </div>
     </main>
   );
