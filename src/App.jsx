@@ -5,6 +5,19 @@ import { ChevronLeft, Plus, Minus, Sun, Moon, Info, ArrowUpRight } from "lucide-
 
 const EMAIL_B64 = "bGFncmFuZ2VkeWxhbkBnbWFpbC5jb20="; // lagrangedylan@gmail.com
 
+const GENERIC_BODY = {
+  fr: [
+    "Texte d’exemple : présentez le contexte (problème, public, objectifs) et votre rôle (recherche, ateliers, prototypage, tests, cadrage technique…).",
+    "Expliquez les décisions clés : contraintes rencontrées, arbitrages UX/UI, accessibilité, performance, éco‑conception.",
+    "Résultats & impact : indicateurs avant/après, retours utilisateurs, apprentissages et suites du projet."
+  ],
+  en: [
+    "Placeholder text: outline the context (problem, audience, goals) and your role (research, workshops, prototyping, testing, technical framing…).",
+    "Explain key decisions: constraints, UX/UI trade‑offs, accessibility, performance and eco‑design considerations.",
+    "Outcomes & impact: before/after metrics, user feedback, learnings, and next steps."
+  ]
+};
+
 const CONTENT = {
   fr: {
     hero: { hello: "Bonjour je suis Dylan,", after: "UX Republic à Bordeaux." },
@@ -58,12 +71,14 @@ const CONTENT = {
   }
 };
 
+// Seed projects with local hero images users can replace later
 function seed(lang) {
   const arr = CONTENT[lang].projects;
   arr.push({ id:"maif",
     title: lang==="fr" ? "MAIF — Outils métiers & design system" : "MAIF — Internal tools & design system",
-    subtitle: lang==="fr" ? "Mission en cours (UX-Republic → MAIF)" : "Ongoing assignment (UX-Republic → MAIF)",
-    summary: lang==="fr" ? "Évolution d’outils métiers, design system, accessibilité." : "Internal tools, design system, accessibility."
+    subtitle: lang==="fr" ? "Mission en cours (UX‑Republic → MAIF)" : "Ongoing assignment (UX‑Republic → MAIF)",
+    summary: lang==="fr" ? "Évolution d’outils métiers, design system, accessibilité." : "Internal tools, design system, accessibility.",
+    image:"/images/projects/maif.svg", hero:"/images/projects/maif.svg"
   });
   for (let i=1;i<=11;i++){
     const id = "p"+String(i).padStart(2,"0");
@@ -71,7 +86,9 @@ function seed(lang) {
       id,
       title: lang==="fr" ? `Projet ${i} — Titre provisoire` : `Project ${i} — Working title`,
       subtitle: lang==="fr" ? "Sous-titre / contexte rapide" : "Subtitle / quick context",
-      summary: lang==="fr" ? "Courte phrase d’accroche du projet." : "Short one-liner for the card."
+      summary: lang==="fr" ? "Courte phrase d’accroche du projet." : "Short one-liner for the card.",
+      image:`/images/projects/${id}.svg`,
+      hero:`/images/projects/${id}.svg`
     });
   }
 }
@@ -149,7 +166,7 @@ function SectionRow({ label, rightAdornment, isOpen, onToggle, children }) {
   return (
     <section className="border-t border-black/10 dark:border-white/10">
       <header className="flex items-center gap-4 py-3 text-base sm:text-lg">
-        <button className="flex-1 text-left font-medium tracking-tight focus:outline-none" aria-expanded={isOpen} onClick={onToggle}>
+        <button className="flex-1 text-left font-normal tracking-tight focus:outline-none" aria-expanded={isOpen} onClick={onToggle}>
           {label}
         </button>
         <div className="mr-2 hidden sm:block">{rightAdornment}</div>
@@ -164,12 +181,12 @@ function SectionRow({ label, rightAdornment, isOpen, onToggle, children }) {
   );
 }
 
-// Hero title with gradient hover on "Product Designer"
+// Hero title (lighter weights)
 function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang }) {
   const t = CONTENT[lang];
   const maxWidth = dims && dims.maxWidth; const maxHeight = dims && dims.maxHeight;
   return (
-    <h1 ref={heroRef} className="text-[1.5rem] sm:text-[1.75rem] md:text-[2.1rem] font-medium leading-[1.14] tracking-tight">
+    <h1 ref={heroRef} className="text-[1.45rem] sm:text-[1.7rem] md:text-[2rem] font-normal leading-[1.14] tracking-tight">
       {t.hero.hello}<br />
       <span className="inline-block align-baseline relative" style={{ width: maxWidth ? (maxWidth + "px") : undefined, height: maxHeight ? (maxHeight + "px") : undefined, lineHeight: "inherit" }}>
         <span className="invisible whitespace-nowrap" style={{ lineHeight: "inherit" }}>
@@ -224,7 +241,7 @@ function ProjectCards({ items, animateKey }){
     const el = listRef.current; if (!el) return;
     el.classList.remove("ready");
     const cards = el.querySelectorAll(".p-card");
-    cards.forEach((c, i) => c.style.setProperty("--d", (i*50)+"ms"));
+    cards.forEach((c, i) => c.style.setProperty("--d", (i*45)+"ms"));
     requestAnimationFrame(() => el.classList.add("ready"));
   }, [items && items.length, animateKey]);
   return (
@@ -273,7 +290,7 @@ function Home({ lang, setLang, theme, setTheme }) {
       const sizePx = cs ? Math.round(parseFloat(cs.fontSize) || 48) : 48;
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
-      ctx.font = "500 " + sizePx + "px " + system;
+      ctx.font = "400 " + sizePx + "px " + system;
       const wPD = ctx.measureText(phrasePD).width;
       const mAA = ctx.measureText("AA");
       const mA_A = ctx.measureText("A A");
@@ -301,7 +318,6 @@ function Home({ lang, setLang, theme, setTheme }) {
     q.set({ open: next || null });
   }
 
-  // localized contact line builder
   const ContactLine = () => (
     <p className="text-[0.98rem] leading-relaxed text-black/80 dark:text-white/80">
       {t.labels.contactLine}
@@ -331,9 +347,9 @@ function Home({ lang, setLang, theme, setTheme }) {
 
         <SectionRow label={t.labels.about} isOpen={open === "about"} onToggle={() => openSection("about")}>
           <div className="space-y-3 max-w-[500px]">
-            <div className="flex flex-wrap items-baseline gap-x-2 text-[0.98rem]">
-              <span className="text-neutral-800 dark:text-neutral-200">{CONTENT[lang].about.headerName}</span>
-              <span className="text-neutral-500 dark:text-neutral-400">• {CONTENT[lang].about.headerUpdated}</span>
+            <div className="text-[0.98rem] leading-tight">
+              <div className="text-neutral-800 dark:text-neutral-200">{" "}{CONTENT[lang].about.headerName}</div>
+              <div className="text-neutral-500 dark:text-neutral-400">{CONTENT[lang].about.headerUpdated}</div>
             </div>
             {CONTENT[lang].about.paragraphs.map((p, i) => (
               <p key={i} className="text-[0.98rem] leading-relaxed text-black/80 dark:text-white/80">{p}</p>
@@ -373,6 +389,8 @@ function ProjectPage({ lang }) {
   const prev = index > 0 ? list[index-1] : null;
   const next = index < list.length-1 ? list[index+1] : null;
 
+  const body = GENERIC_BODY[lang];
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-16">
       <button onClick={() => navigate('/?open=projects')} className="mb-6 inline-flex items-center gap-2 text-sm underline-offset-4 hover:underline">
@@ -383,6 +401,15 @@ function ProjectPage({ lang }) {
       {project.subtitle ? <h2 className="mt-2 text-lg text-black/70 dark:text-white/70">{project.subtitle}</h2> : null}
       {project.summary ? <p className="mt-2 text-black/60 dark:text-white/60">{project.summary}</p> : null}
 
+      {/* Large hero image */}
+      <img src={project.hero || project.image} alt="aperçu" className="mt-8 aspect-[16/9] w-full rounded-2xl object-cover ring-1 ring-black/10 dark:ring-white/10" />
+
+      {/* Generic body text */}
+      <div className="prose prose-neutral dark:prose-invert max-w-none mt-8">
+        {body.map((p,i)=>(<p key={i}>{p}</p>))}
+      </div>
+
+      {/* Prev / Next */}
       <div className="mt-10 flex items-center justify-between gap-3">
         <div>
           {prev ? (

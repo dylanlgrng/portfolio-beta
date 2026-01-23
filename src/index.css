@@ -36,7 +36,7 @@ html { scroll-behavior: smooth; }
   opacity: 1; 
   filter: blur(0); 
   clip-path: inset(0% 0% 0% 0%);
-  overflow: visible; /* allow inner effects */
+  overflow: visible;
 }
 .accordion-inner {
   opacity: 0;
@@ -68,14 +68,13 @@ html { scroll-behavior: smooth; }
     background 200ms ease,
     transform 220ms cubic-bezier(.22,1,.36,1),
     border-color 220ms ease;
-  overflow: hidden; /* keep inner highlight contained */
+  overflow: hidden;
 }
 .dark .p-card {
   background: rgb(255 255 255 / 0.05);
   border-color: rgb(255 255 255 / 0.12);
 }
 
-/* Inner hover highlight sweep (no external shadow) */
 .p-card::before {
   content: "";
   position: absolute;
@@ -92,22 +91,18 @@ html { scroll-behavior: smooth; }
 .dark .p-card::before {
   background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.10) 50%, transparent 100%);
 }
-.p-card:hover::before {
-  opacity: 1;
-  background-position: 100% 0%;
-}
+.p-card:hover::before { opacity: 1; background-position: 100% 0%; }
 .p-card:hover { transform: translateY(-1px); }
 
-/* One-line text inside card (truncate on desktop), allow wrap on very small screens */
+/* One-line text inside card */
 .p-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.p-title { font-weight: 500; font-size: 0.98rem; }
+.p-title { font-weight: 400; font-size: 0.97rem; }
 .p-sep { opacity: .35; padding: 0 6px; }
-.p-sub { font-size: .95rem; opacity: .7; font-weight: 400; }
-@media (max-width: 380px) {
-  .p-line { white-space: normal; }
-}
+.p-sub { font-size: .94rem; opacity: .8; font-weight: 300; }
 
-/* Stagger entrance for projects (triggered on open) */
+@media (max-width: 380px) { .p-line { white-space: normal; } }
+
+/* Stagger entrance */
 .p-list .p-card { opacity: 0; transform: translateY(10px) scale(.985); filter: blur(6px); }
 .p-list.ready .p-card {
   opacity: 1;
