@@ -36,8 +36,7 @@ html { scroll-behavior: smooth; }
   opacity: 1; 
   filter: blur(0); 
   clip-path: inset(0% 0% 0% 0%);
-  overflow-x: visible; /* let card shadows be visible horizontally */
-  overflow-y: hidden;
+  overflow: visible; /* allow inner effects */
 }
 .accordion-inner {
   opacity: 0;
@@ -52,10 +51,11 @@ html { scroll-behavior: smooth; }
 .lang-fx { animation: langfade .28s ease both; }
 @keyframes langfade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Project list — full-width single column cards (smaller) */
+/* Project list — full-width single column cards */
 .p-list { display: grid; grid-template-columns: 1fr; gap: 8px; }
 
 .p-card {
+  position: relative;
   display: flex;
   align-items: center;
   width: 100%;
@@ -64,26 +64,39 @@ html { scroll-behavior: smooth; }
   border-radius: 10px;
   background: rgb(255 255 255 / 0.9);
   border: 1px solid rgb(0 0 0 / 0.08);
-  box-shadow: 0 1px 0 rgb(0 0 0 / 0.05);
   transition:
     background 200ms ease,
-    transform 240ms cubic-bezier(.22,1,.36,1),
-    box-shadow 240ms cubic-bezier(.22,1,.36,1),
-    border-color 200ms ease;
-  margin-inline: 2px; /* prevent shadow clipping at container edge */
+    transform 220ms cubic-bezier(.22,1,.36,1),
+    border-color 220ms ease;
+  overflow: hidden; /* keep inner highlight contained */
 }
 .dark .p-card {
   background: rgb(255 255 255 / 0.05);
   border-color: rgb(255 255 255 / 0.12);
-  box-shadow: 0 1px 0 rgb(255 255 255 / 0.05);
 }
-.p-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgb(0 0 0 / 0.10);
+
+/* Inner hover highlight sweep (no external shadow) */
+.p-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 0%, rgba(0,0,0,.06) 50%, transparent 100%);
+  background-size: 200% 100%;
+  background-position: 0% 0%;
+  opacity: 0;
+  transition:
+    opacity 200ms ease,
+    background-position 700ms cubic-bezier(.22,1,.36,1);
+  pointer-events: none;
 }
-.dark .p-card:hover {
-  box-shadow: 0 8px 22px rgb(0 0 0 / 0.40);
+.dark .p-card::before {
+  background: linear-gradient(120deg, transparent 0%, rgba(255,255,255,.10) 50%, transparent 100%);
 }
+.p-card:hover::before {
+  opacity: 1;
+  background-position: 100% 0%;
+}
+.p-card:hover { transform: translateY(-1px); }
 
 /* One-line text inside card (truncate on desktop), allow wrap on very small screens */
 .p-line { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -110,4 +123,5 @@ html { scroll-behavior: smooth; }
   .accordion { transition: none !important; height: auto !important; clip-path: none !important; filter: none !important; opacity: 1 !important; }
   .accordion-inner { transition: none !important; opacity: 1 !important; transform: none !important; }
   .p-list .p-card { transition: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
+  .p-card::before { transition: none !important; }
 }

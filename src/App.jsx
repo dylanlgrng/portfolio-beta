@@ -3,6 +3,8 @@ import React, { useRef, useState, useEffect } from "react";
 import { HashRouter, Routes, Route, Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Plus, Minus, Sun, Moon, Info, ArrowUpRight } from "lucide-react";
 
+const EMAIL_B64 = "bGFncmFuZ2VkeWxhbkBnbWFpbC5jb20="; // lagrangedylan@gmail.com
+
 const CONTENT = {
   fr: {
     hero: { hello: "Bonjour je suis Dylan,", after: "UX Republic à Bordeaux." },
@@ -10,17 +12,22 @@ const CONTENT = {
       about: "À propos", projects: "Projets",
       back: "Retour",
       info: "Conçu en vibe coding en React avec ChatGPT 5.2.",
-      next: "Projet suivant", prev: "Projet précédent"
+      next: "Projet suivant", prev: "Projet précédent",
+      contactLine: "Vous pouvez me contacter par ",
+      email: "mail",
+      or: " ou sur ",
+      linkedin: "LinkedIn"
     },
     about: {
       headerName: "Dylan Lagrange",
       headerUpdated: "Mis à jour en janvier 2026",
       paragraphs: [
         "Je suis né dans les Landes et je vis aujourd’hui à Bordeaux.",
-        "Je travaille actuellement pour UX‑Republic, en mission au sein de la DSI de la MAIF. J’y conçois et fais évoluer des outils internes utilisés au quotidien par les collaborateurs, en travaillant main dans la main avec les équipes métiers, produit, tech et design. J’interviens sur des produits complexes comme des logiciels métiers, des design systems, des sujets d’accessibilité ou des outils de communication multicanale, avec l’envie de rendre les parcours plus clairs, plus simples et plus cohérents.",
-        "Auparavant, j’ai travaillé chez Kairos Agency, une agence web bordelaise spécialisée dans l’éco‑conception. J’y ai conçu des produits très variés, du SaaS B2B à l’e‑learning, en passant par des sites à fort impact, des design systems et des interfaces de gestion, pour des organisations publiques et privées.",
-        "Mon objectif est d’imaginer des expériences utiles et durables, au service des utilisateurs comme des organisations, en intégrant des valeurs d’inclusivité et d’éco‑responsabilité. Mon travail est aussi nourri par un intérêt pour les pratiques artistiques et artisanales, notamment le cinéma, l’architecture et la photographie, ainsi que par une attention constante portée aux évolutions technologiques et à leurs usages."
-      ]
+        "Je travaille actuellement pour UX-Republic, en mission au sein de la DSI de la MAIF. J’y conçois et fais évoluer des outils internes utilisés au quotidien par les collaborateurs, en travaillant main dans la main avec les équipes métiers, produit, tech et design. J’interviens sur des produits complexes comme des logiciels métiers, des design systems, des sujets d’accessibilité ou des outils de communication multicanale, avec l’envie de rendre les parcours plus clairs, plus simples et plus cohérents.",
+        "Auparavant, j’ai travaillé chez Kairos Agency, une agence web bordelaise spécialisée dans l’éco-conception. J’y ai conçu des produits très variés, du SaaS B2B à l’e-learning, en passant par des sites à fort impact, des design systems et des interfaces de gestion, pour des organisations publiques et privées.",
+        "Mon objectif est d’imaginer des expériences utiles et durables, au service des utilisateurs comme des organisations, en intégrant des valeurs d’inclusivité et d’éco-responsabilité. Mon travail est aussi nourri par un intérêt pour les pratiques artistiques et artisanales, notamment le cinéma, l’architecture et la photographie, ainsi que par une attention constante portée aux évolutions technologiques et à leurs usages."
+      ],
+      linkedin: "https://www.linkedin.com/in/dylanlgrng/"
     },
     projects: []
   },
@@ -29,18 +36,23 @@ const CONTENT = {
     labels: {
       about: "About me", projects: "Projects",
       back: "Back",
-      info: "Built in vibe‑coding style with React and ChatGPT 5.2.",
-      next: "Next project", prev: "Previous project"
+      info: "Built in vibe-coding style with React and ChatGPT 5.2.",
+      next: "Next project", prev: "Previous project",
+      contactLine: "You can reach me by ",
+      email: "email",
+      or: " or on ",
+      linkedin: "LinkedIn"
     },
     about: {
       headerName: "Dylan Lagrange",
       headerUpdated: "Updated January 2026",
       paragraphs: [
         "Born in the Landes, now based in Bordeaux.",
-        "I currently work for UX‑Republic on assignment within MAIF’s IT department. I design and evolve internal tools used daily by employees, partnering closely with business, product, engineering and design teams. I work on complex products—line‑of‑business software, design systems, accessibility topics and multichannel communication tools—with the aim of making journeys clearer, simpler and more coherent.",
-        "Previously, I worked at Kairos Agency, a Bordeaux‑based web agency specializing in eco‑design. I designed a wide range of products—from B2B SaaS to e‑learning—plus high‑impact websites, design systems and admin interfaces for public and private organizations.",
+        "I currently work for UX-Republic on assignment within MAIF’s IT department. I design and evolve internal tools used daily by employees, partnering closely with business, product, engineering and design teams. I work on complex products—line-of-business software, design systems, accessibility topics and multichannel communication tools—with the aim of making journeys clearer, simpler and more coherent.",
+        "Previously, I worked at Kairos Agency, a Bordeaux-based web agency specializing in eco-design. I designed a wide range of products—from B2B SaaS to e-learning—plus high-impact websites, design systems and admin interfaces for public and private organizations.",
         "My goal is to craft useful, durable experiences that serve both users and organizations, grounded in inclusivity and environmental responsibility. My work is also informed by artistic and craft practices—film, architecture and photography—and by an ongoing attention to technology and its uses."
-      ]
+      ],
+      linkedin: "https://www.linkedin.com/in/dylanlgrng/"
     },
     projects: []
   }
@@ -50,7 +62,7 @@ function seed(lang) {
   const arr = CONTENT[lang].projects;
   arr.push({ id:"maif",
     title: lang==="fr" ? "MAIF — Outils métiers & design system" : "MAIF — Internal tools & design system",
-    subtitle: lang==="fr" ? "Mission en cours (UX‑Republic → MAIF)" : "Ongoing assignment (UX‑Republic → MAIF)",
+    subtitle: lang==="fr" ? "Mission en cours (UX-Republic → MAIF)" : "Ongoing assignment (UX-Republic → MAIF)",
     summary: lang==="fr" ? "Évolution d’outils métiers, design system, accessibilité." : "Internal tools, design system, accessibility."
   });
   for (let i=1;i<=11;i++){
@@ -58,8 +70,8 @@ function seed(lang) {
     arr.push({
       id,
       title: lang==="fr" ? `Projet ${i} — Titre provisoire` : `Project ${i} — Working title`,
-      subtitle: lang==="fr" ? "Sous‑titre / contexte rapide" : "Subtitle / quick context",
-      summary: lang==="fr" ? "Courte phrase d’accroche du projet." : "Short one‑liner for the card."
+      subtitle: lang==="fr" ? "Sous-titre / contexte rapide" : "Subtitle / quick context",
+      summary: lang==="fr" ? "Courte phrase d’accroche du projet." : "Short one-liner for the card."
     });
   }
 }
@@ -173,7 +185,7 @@ function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang }) {
   );
 }
 
-// Top‑right controls
+// Top-right controls
 function TopRightControls({ lang, setLang, theme, setTheme, onLangFX }) {
   const t = CONTENT[lang];
   const [open, setOpen] = useState(false);
@@ -205,7 +217,7 @@ function TopRightControls({ lang, setLang, theme, setTheme, onLangFX }) {
   );
 }
 
-// Re‑stagger animation when projects section opens
+// Re-stagger animation when projects section opens
 function ProjectCards({ items, animateKey }){
   const listRef = useRef(null);
   useEffect(() => {
@@ -289,6 +301,21 @@ function Home({ lang, setLang, theme, setTheme }) {
     q.set({ open: next || null });
   }
 
+  // localized contact line builder
+  const ContactLine = () => (
+    <p className="text-[0.98rem] leading-relaxed text-black/80 dark:text-white/80">
+      {t.labels.contactLine}
+      <a href="#" onClick={(e)=>{e.preventDefault(); try { const addr = atob(EMAIL_B64); window.location.href = "mailto:" + addr; } catch(_) {} }} className="underline underline-offset-2 hover:no-underline">
+        {t.labels.email}
+      </a>
+      {t.labels.or}
+      <a href={CONTENT[lang].about.linkedin} target="_blank" rel="noreferrer" className="underline underline-offset-2 hover:no-underline">
+        {t.labels.linkedin}
+      </a>
+      .
+    </p>
+  );
+
   return (
     <main className={"theme-shell flex min-h-dvh flex-col bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100"} style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans', sans-serif" }}>
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 pt-4">
@@ -303,12 +330,15 @@ function Home({ lang, setLang, theme, setTheme }) {
         </div>
 
         <SectionRow label={t.labels.about} isOpen={open === "about"} onToggle={() => openSection("about")}>
-          <div className="space-y-3">
-            <p className="text-[0.98rem] text-neutral-800 dark:text-neutral-200">{CONTENT[lang].about.headerName}</p>
-            <p className="text-[0.98rem] text-neutral-500 dark:text-neutral-400">{CONTENT[lang].about.headerUpdated}</p>
+          <div className="space-y-3 max-w-[500px]">
+            <div className="flex flex-wrap items-baseline gap-x-2 text-[0.98rem]">
+              <span className="text-neutral-800 dark:text-neutral-200">{CONTENT[lang].about.headerName}</span>
+              <span className="text-neutral-500 dark:text-neutral-400">• {CONTENT[lang].about.headerUpdated}</span>
+            </div>
             {CONTENT[lang].about.paragraphs.map((p, i) => (
               <p key={i} className="text-[0.98rem] leading-relaxed text-black/80 dark:text-white/80">{p}</p>
             ))}
+            <ContactLine />
           </div>
         </SectionRow>
 
