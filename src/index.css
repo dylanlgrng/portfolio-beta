@@ -4,9 +4,7 @@
 
 html, body, #root { height: 100%; }
 html { scroll-behavior: smooth; }
-body { overflow-x: hidden; } /* avoid body horizontal scroll */
 
-/* Smooth color changes for theme */
 .theme-shell { @apply transition-colors duration-500; }
 
 .gradient-text {
@@ -23,7 +21,6 @@ body { overflow-x: hidden; } /* avoid body horizontal scroll */
 .photo-square { width: 170px; aspect-ratio: 1 / 1; object-fit: cover; border-radius: 12px; }
 @media (min-width: 640px) { .photo-square { width: 200px; } }
 
-/* Accordion smooth open/close */
 .accordion {
   overflow: hidden;
   height: 0;
@@ -48,46 +45,65 @@ body { overflow-x: hidden; } /* avoid body horizontal scroll */
 }
 .accordion.open .accordion-inner { opacity: 1; transform: translateY(0) scale(1); }
 
-/* Full-bleed helper */
-.bleed-x { margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); }
-.bleed-pad { padding-left: max(1rem, env(safe-area-inset-left)); padding-right: max(1rem, env(safe-area-inset-right)); }
-@media (min-width: 640px) { .bleed-pad { padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); } }
+.lang-fx { animation: langfade .28s ease both; }
+@keyframes langfade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* Horizontal scroller for projects — smaller cards */
-.hscroller {
+.p-list {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: clamp(200px, 22vw, 270px); /* smaller than before */
-  gap: 0.75rem;
-  overflow-x: auto;
-  padding-bottom: .75rem;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: thin;
+  grid-template-columns: 1fr;
+  gap: 10px;
 }
-.hscroller .card {
-  scroll-snap-align: start;
+@media (min-width: 640px) { .p-list { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 1024px) { .p-list { grid-template-columns: 1fr 1fr 1fr; } }
+
+.p-card {
+  display: flex;
+  align-items: center;
+  min-height: 64px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.9);
+  border: 1px solid rgb(0 0 0 / 0.08);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.05);
+  transition:
+    background 240ms ease,
+    transform 260ms cubic-bezier(.22,1,.36,1),
+    box-shadow 260ms cubic-bezier(.22,1,.36,1),
+    border-color 240ms ease;
+}
+.dark .p-card {
+  background: rgb(255 255 255 / 0.05);
+  border-color: rgb(255 255 255 / 0.12);
+  box-shadow: 0 1px 0 rgb(255 255 255 / 0.05);
+}
+.p-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.10);
+}
+.dark .p-card:hover {
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.40);
+}
+
+.p-title { font-weight: 600; }
+.p-sub { font-size: .9rem; opacity: .7; margin-top: 2px; }
+
+.p-list .p-card {
   opacity: 0;
   transform: translateY(12px) scale(.985);
   filter: blur(6px);
+}
+.p-list.ready .p-card {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: none;
   transition:
     opacity 420ms cubic-bezier(.22,1,.36,1) var(--d, 0ms),
     transform 420ms cubic-bezier(.22,1,.36,1) var(--d, 0ms),
     filter 420ms cubic-bezier(.22,1,.36,1) var(--d, 0ms);
 }
-.hscroller.ready .card {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-  filter: none;
-}
-
-/* Language switch fade */
-.lang-fx { animation: langfade .28s ease both; }
-@keyframes langfade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (prefers-reduced-motion: reduce) {
-  .accordion, .hscroller .card { transition: none !important; }
-  .accordion { height: auto !important; clip-path: none !important; filter: none !important; opacity: 1 !important; }
+  .accordion { transition: none !important; height: auto !important; clip-path: none !important; filter: none !important; opacity: 1 !important; }
   .accordion-inner { transition: none !important; opacity: 1 !important; transform: none !important; }
-  .hscroller .card { opacity: 1 !important; transform: none !important; filter: none !important; }
+  .p-list .p-card { transition: none !important; opacity: 1 !important; transform: none !important; filter: none !important; }
 }

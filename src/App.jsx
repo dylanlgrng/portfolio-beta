@@ -1,6 +1,7 @@
+
 import React, { useRef, useState, useEffect } from "react";
 import { HashRouter, Routes, Route, Link, useParams, useNavigate, useLocation } from "react-router-dom";
-import { ChevronLeft, Plus, Minus, Mail, Linkedin, Phone, ArrowUpRight, Sun, Moon, Info } from "lucide-react";
+import { ChevronLeft, Plus, Minus, Mail, Linkedin, Phone, Sun, Moon, Info, ArrowUpRight } from "lucide-react";
 
 const EMAIL_B64 = "bGFncmFuZ2VkeWxhbkBnbWFpbC5jb20=";
 
@@ -56,17 +57,17 @@ function seed(lang) {
     image:"images/logomaif.svg",
     summary: lang==="fr" ? "Évolution d’outils métiers, design system, accessibilité." : "Internal tools, design system, accessibility.",
     description: lang==="fr"
-      ? "Au sein de la DSI de la MAIF, j’accompagne l’évolution des outils métiers. Co-conception avec les équipes projet, contribution au design system, attention continue à l’accessibilité et à l’éco‑conception, et participation aux réflexions collectives autour des pratiques et de l’IA."
-      : "Within MAIF’s IT department, I help evolve internal tools. Co-design with project teams, design system contributions, continuous focus on accessibility and eco‑design, plus collective reflections around practices and AI."
+      ? "Au sein de la DSI de la MAIF, j’accompagne l’évolution des outils métiers. Co‑conception avec les équipes projet, contribution au design system, attention continue à l’accessibilité et à l’éco‑conception, et participation aux réflexions collectives autour des pratiques et de l’IA."
+      : "Within MAIF’s IT department, I help evolve internal tools. Co‑design with project teams, design system contributions, continuous focus on accessibility and eco‑design, plus collective reflections around practices and AI."
   });
   for (let i=1;i<=11;i++){
     const id = "p"+String(i).padStart(2,"0");
     arr.push({
       id,
       title: lang==="fr" ? `Projet ${i} — Titre provisoire` : `Project ${i} — Working title`,
-      subtitle: lang==="fr" ? "Sous-titre / contexte rapide" : "Subtitle / quick context",
+      subtitle: lang==="fr" ? "Sous‑titre / contexte rapide" : "Subtitle / quick context",
       image:`images/projects/${id}.svg`,
-      summary: lang==="fr" ? "Courte phrase d’accroche du projet." : "Short one-liner for the card.",
+      summary: lang==="fr" ? "Courte phrase d’accroche du projet." : "Short one‑liner for the card.",
       description: lang==="fr" ?
         "Décrivez ici les objectifs, les contraintes et votre rôle. Ajoutez vos livrables (recherche, maquettes, design system…), les résultats et ce que vous avez appris." :
         "Describe goals, constraints, and your role. Add deliverables (research, wireframes, design system…), outcomes, and what you learned."
@@ -149,7 +150,6 @@ function SectionRow({ label, rightAdornment, isOpen, onToggle, children }) {
 function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang }) {
   const t = CONTENT[lang];
   const maxWidth = dims && dims.maxWidth; const maxHeight = dims && dims.maxHeight;
-  // Smaller sizes than before (slightly)
   return (
     <h1 ref={heroRef} className="text-2xl sm:text-3xl md:text-4xl font-medium leading-[1.12] tracking-tight">
       {t.hero.hello}<br />
@@ -211,6 +211,29 @@ function useQueryState() {
   return { get, set };
 }
 
+function ProjectCards({ items }){
+  const listRef = useRef(null);
+  useEffect(() => {
+    const el = listRef.current; if (!el) return;
+    const cards = el.querySelectorAll(".p-card");
+    cards.forEach((c, i) => c.style.setProperty("--d", (i*50)+"ms"));
+    requestAnimationFrame(() => el.classList.add("ready"));
+  }, [items && items.length]);
+  return (
+    <div ref={listRef} className="p-list">
+      {items.map((p) => (
+        <Link key={p.id} to={"/projects/" + p.id} className="p-card group">
+          <div className="flex-1">
+            <div className="p-title">{p.title}</div>
+            {p.subtitle ? <div className="p-sub">{p.subtitle}</div> : null}
+          </div>
+          <ArrowUpRight className="opacity-60 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" size={16} />
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 function Home({ lang, setLang, theme, setTheme }) {
   const t = CONTENT[lang];
   const q = useQueryState();
@@ -266,16 +289,6 @@ function Home({ lang, setLang, theme, setTheme }) {
     q.set({ open: next || null });
   }
 
-  // Prepare scroller reveal effect
-  const scrollerRef = useRef(null);
-  useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const cards = el.querySelectorAll(".card");
-    cards.forEach((c, i) => c.style.setProperty("--d", (i*60)+"ms"));
-    requestAnimationFrame(() => el.classList.add("ready"));
-  }, [lang]);
-
   return (
     <main className={"theme-shell flex min-h-dvh flex-col bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100"} style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans', sans-serif" }}>
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 pt-4">
@@ -311,7 +324,7 @@ function Home({ lang, setLang, theme, setTheme }) {
                 <a href={CONTENT[lang].about.contact.linkedin} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition bg-white/90 dark:bg-white/5 backdrop-blur">
                   <Linkedin size={16} /> LinkedIn
                 </a>
-                <a href={"tel:+33" + (CONTENT[lang].about.contact.phone || "").replace(/\D/g,'')} className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition bg-white/90 dark:bg-white/5 backdrop-blur">
+                <a href={"tel:+33" + (CONTENT[lang].about.contact.phone || "").replace(/\\D/g,'')} className="inline-flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 px-4 py-2 text-sm font-medium shadow-sm hover:shadow-md transition bg-white/90 dark:bg-white/5 backdrop-blur">
                   <Phone size={16} /> {CONTENT[lang].about.contact.phone}
                 </a>
               </div>
@@ -326,26 +339,7 @@ function Home({ lang, setLang, theme, setTheme }) {
         </SectionRow>
 
         <SectionRow label={t.labels.projects} isOpen={open === "projects"} onToggle={() => openSection("projects")}>
-          {/* Full-bleed wrapper to let cards "dépasser sur les côtés" */}
-          <div className="bleed-x">
-            <div className="bleed-pad">
-              <div className="space-y-3">
-                <div ref={scrollerRef} className="hscroller">
-                  {(CONTENT[lang].projects || []).map((p, i) => (
-                    <div key={p.id} className="card">
-                      <Link to={"/projects/" + p.id} className="group block overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 shadow-sm ring-1 ring-black/5 dark:ring-white/5 transition bg-white dark:bg-neutral-900">
-                        <img src={p.image} alt={"aperçu " + p.title} className="aspect-[4/3] w-full object-cover" />
-                        <div className="flex items-center justify-between p-3">
-                          <span className="text-sm font-medium">{p.title}</span>
-                          <ArrowUpRight className="opacity-60 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-100" size={16} />
-                        </div>
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
+          <ProjectCards items={CONTENT[lang].projects || []} />
         </SectionRow>
       </div>
     </main>
