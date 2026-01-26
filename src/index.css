@@ -3,9 +3,12 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-html { -webkit-tap-highlight-color: transparent; }
+html { -webkit-tap-highlight-color: transparent; background:#ffffff; color-scheme: light; }
+body { background: inherit; }
+.dark html { background:#0a0a0a; color-scheme: dark; }
+.dark body { background: inherit; }
 
-.theme-shell { @apply transition-colors duration-500; }
+.theme-shell { @apply transition-colors duration-700; }
 
 .gradient-text {
   background-image: linear-gradient(90deg, #0ea5e9, #a78bfa, #f472b6, #f59e0b, #10b981, #0ea5e9);
@@ -18,32 +21,24 @@ html { -webkit-tap-highlight-color: transparent; }
   color: transparent;
 }
 
-/* First-load intro: hero first, rest fades in */
-.intro-rest {
-  opacity: 0; transform: translateY(6px);
-  transition: opacity 420ms ease, transform 420ms cubic-bezier(.22,1,.36,1);
-  will-change: opacity, transform;
-}
-.intro-rest.visible { opacity: 1; transform: translateY(0); }
-
-/* Accordion: keep it light for iOS (no blur/clip-path) */
+/* Accordion: simple & smooth for iOS */
 .accordion {
   overflow: hidden;
   height: 0;
   opacity: 0;
   transition:
-    height 420ms cubic-bezier(.22,1,.36,1),
-    opacity 300ms ease;
+    height 550ms cubic-bezier(.22,1,.36,1),
+    opacity 500ms ease;
   will-change: height, opacity;
 }
 .accordion.open { opacity: 1; }
 
 .accordion-inner {
   opacity: 0;
-  transform: translateY(6px);
+  transform: translateY(8px);
   transition:
-    opacity 320ms ease,
-    transform 320ms cubic-bezier(.22,1,.36,1);
+    opacity 500ms ease,
+    transform 550ms cubic-bezier(.22,1,.36,1);
   will-change: opacity, transform;
 }
 .accordion.open .accordion-inner { opacity: 1; transform: translateY(0); }
@@ -55,7 +50,7 @@ html { -webkit-tap-highlight-color: transparent; }
   min-height:44px; padding:10px 12px; border-radius:10px;
   background: rgb(255 255 255 / 0.9);
   border: 1px solid rgb(0 0 0 / 0.08);
-  transition: background 180ms ease, transform 200ms cubic-bezier(.22,1,.36,1), border-color 200ms ease;
+  transition: background 220ms ease, transform 280ms cubic-bezier(.22,1,.36,1), border-color 220ms ease;
 }
 .dark .p-card { background: rgb(255 255 255 / 0.05); border-color: rgb(255 255 255 / 0.12); }
 .p-card:hover { transform: translateY(-1px); }
@@ -63,17 +58,26 @@ html { -webkit-tap-highlight-color: transparent; }
 .p-title { font-weight: 400; font-size: 0.97rem; }
 .p-sep { opacity: .35; padding: 0 6px; }
 .p-sub { font-size: .94rem; opacity: .8; font-weight: 300; }
-@media (max-width: 380px) { .p-line { white-space: normal; } }
 
-/* Cards entrance */
-.p-list .p-card { opacity: 0; transform: translateY(8px) scale(.99); }
+/* Mobile: allow wrapping to two lines and prevent horizontal overflow */
+@media (max-width: 640px) {
+  .p-line {
+    white-space: normal;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    -webkit-line-clamp: 2;
+  }
+}
+
+/* Cards entrance — slower */
+.p-list .p-card { opacity: 0; transform: translateY(10px) scale(.99); }
 .p-list.ready .p-card {
   opacity: 1; transform: translateY(0) scale(1);
-  transition: opacity 320ms ease var(--d,0ms), transform 320ms cubic-bezier(.22,1,.36,1) var(--d,0ms);
+  transition: opacity 520ms ease var(--d,0ms), transform 520ms cubic-bezier(.22,1,.36,1) var(--d,0ms);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .intro-rest { transition: none !important; opacity: 1 !important; transform: none !important; }
   .accordion { transition: none !important; height: auto !important; opacity: 1 !important; }
   .accordion-inner { transition: none !important; opacity: 1 !important; transform: none !important; }
   .p-list .p-card, .p-list.ready .p-card { transition:none !important; opacity:1 !important; transform:none !important; }

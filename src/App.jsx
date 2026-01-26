@@ -1,5 +1,5 @@
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useLayoutEffect } from "react";
 import { HashRouter, Routes, Route, Link, useParams, useNavigate, useLocation } from "react-router-dom";
 import { ChevronLeft, Plus, Minus, Sun, Moon, Info, ArrowUpRight } from "lucide-react";
 
@@ -83,8 +83,8 @@ function seed(lang) {
     const id = "p"+String(i).padStart(2,"0");
     arr.push({
       id,
-      title: lang==="fr" ? `Projet ${i} — Titre provisoire` : `Project ${i} — Working title`,
-      subtitle: lang==="fr" ? "Sous-titre / contexte rapide" : "Subtitle / quick context",
+      title: lang==="fr" ? `Projet #${i}` : `Project #${i}`,
+      subtitle: lang==="fr" ? "Sous-titre" : "Subtitle",
       summary: lang==="fr" ? "Courte phrase d’accroche du projet." : "Short one-liner for the card.",
       image:`/images/projects/${id}.svg`,
       hero:`/images/projects/${id}.svg`
@@ -204,7 +204,7 @@ function IntroTitle({ dims, spacePx, heroRef, bgX, hovering, lang }) {
   );
 }
 
-function TopRightControls({ lang, setLang, theme, setTheme, onLangFX }) {
+function TopRightControls({ lang, setLang, theme, setTheme }) {
   const [open, setOpen] = useState(false);
   const tooltipRef = useRef(null);
   useEffect(() => {
@@ -215,7 +215,7 @@ function TopRightControls({ lang, setLang, theme, setTheme, onLangFX }) {
   const t = CONTENT[lang];
   return (
     <div className="relative flex items-center justify-end gap-3 text-xs opacity-80 hover:opacity-100 transition">
-      <button onClick={() => { setLang(lang === "fr" ? "en" : "fr"); onLangFX && onLangFX(); }} className="rounded-full border border-black/10 dark:border-white/10 px-2 py-1 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
+      <button onClick={() => setLang(lang === "fr" ? "en" : "fr")} className="rounded-full border border-black/10 dark:border-white/10 px-2 py-1 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
         {lang === "fr" ? "EN" : "FR"}
       </button>
       <button onClick={() => { setTheme(theme === "dark" ? "light" : "dark"); localStorage.setItem("theme_override","1"); }} className="rounded-full border border-black/10 dark:border-white/10 p-1.5 bg-white/70 dark:bg-white/10 backdrop-blur-sm">
@@ -241,7 +241,7 @@ function ProjectCards({ items, animateKey }){
     const el = listRef.current; if (!el) return;
     el.classList.remove("ready");
     const cards = el.querySelectorAll(".p-card");
-    cards.forEach((c, i) => c.style.setProperty("--d", (i*45)+"ms"));
+    cards.forEach((c, i) => c.style.setProperty("--d", (i*65)+"ms"));
     requestAnimationFrame(() => el.classList.add("ready"));
   }, [items && items.length, animateKey]);
   return (
@@ -285,20 +285,6 @@ function Home({ lang, setLang, theme, setTheme }) {
   const initialOpen = q.get("open") || null;
   const [open, setOpen] = useState(initialOpen);
   useEffect(() => { setOpen(q.get("open")); }, [q.get("open")]);
-
-  // First-load intro: show hero immediately, rest fades in once
-  const [restVisible, setRestVisible] = useState(true);
-  useEffect(() => {
-    const seen = sessionStorage.getItem("intro_seen") === "1";
-    if (!seen) {
-      setRestVisible(false);
-      const t = setTimeout(() => {
-        setRestVisible(true);
-        sessionStorage.setItem("intro_seen","1");
-      }, 450); // subtle delay
-      return () => clearTimeout(t);
-    }
-  }, []);
 
   // Hero hover gradient
   const heroWrapRef = useRef(null);
@@ -363,34 +349,32 @@ function Home({ lang, setLang, theme, setTheme }) {
   return (
     <main className={"theme-shell flex min-h-dvh flex-col bg-white text-neutral-900 dark:bg-neutral-950 dark:text-neutral-100"} style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, 'Noto Sans', sans-serif" }}>
       <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 pt-4">
-        <TopRightControls lang={lang} setLang={setLang} theme={theme} setTheme={setTheme} onLangFX={()=>{}} />
+        <TopRightControls lang={lang} setLang={setLang} theme={theme} setTheme={setTheme} />
       </div>
 
       <div className="mx-auto mt-auto w-full max-w-6xl px-4 sm:px-6">
         <div ref={heroWrapRef} className={"pb-4 select-none"} onMouseEnter={() => setHovering(true)} onMouseMove={onMouseMoveHero} onMouseLeave={() => setHovering(false)}>
-          <div ref={heroTextRef} className="opacity-0 animate-[fadein_.45s_ease_forwards] [@keyframes_fadein]{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}">
+          <div ref={heroTextRef}>
             <IntroTitle lang={lang} hovering={hovering} bgX={bgX} dims={dims} spacePx={spacePx} heroRef={heroTextRef} />
           </div>
         </div>
 
-        <div className={"intro-rest " + (restVisible ? "visible" : "")}>
-          <SectionRow label={t.labels.about} isOpen={open === "about"} onToggle={() => openSection("about")}>
-            <div className="space-y-3 max-w-[500px]">
-              <div className="text-[0.98rem] leading-tight">
-                <div className="text-neutral-800 dark:text-neutral-200">{CONTENT[lang].about.headerName}</div>
-                <div className="text-neutral-500 dark:text-neutral-400">{CONTENT[lang].about.headerUpdated}</div>
-              </div>
-              {CONTENT[lang].about.paragraphs.map((p, i) => (
-                <p key={i} className="text-[0.98rem] leading-relaxed text-black/80 dark:text-white/80">{p}</p>
-              ))}
-              <ContactLine />
+        <SectionRow label={t.labels.about} isOpen={open === "about"} onToggle={() => openSection("about")}>
+          <div className="space-y-3 max-w-[500px]">
+            <div className="text-[0.98rem] leading-tight">
+              <div className="text-neutral-800 dark:text-neutral-200">{CONTENT[lang].about.headerName}</div>
+              <div className="text-neutral-500 dark:text-neutral-400">{CONTENT[lang].about.headerUpdated}</div>
             </div>
-          </SectionRow>
+            {CONTENT[lang].about.paragraphs.map((p, i) => (
+              <p key={i} className="text-[0.98rem] leading-relaxed text-black/80 dark:text-white/80">{p}</p>
+            ))}
+            <ContactLine />
+          </div>
+        </SectionRow>
 
-          <SectionRow label={t.labels.projects} isOpen={open === "projects"} onToggle={() => openSection("projects")}>
-            <ProjectCards items={CONTENT[lang].projects || []} animateKey={open === "projects" ? "open" : "closed"} />
-          </SectionRow>
-        </div>
+        <SectionRow label={t.labels.projects} isOpen={open === "projects"} onToggle={() => openSection("projects")}>
+          <ProjectCards items={CONTENT[lang].projects || []} animateKey={open === "projects" ? "open" : "closed"} />
+        </SectionRow>
       </div>
     </main>
   );
@@ -404,6 +388,11 @@ function ProjectPage({ lang }) {
   const list = (t.projects || []);
   const index = Math.max(0, list.findIndex(p => p.id === id));
   const project = list[index];
+
+  useLayoutEffect(() => {
+    // Always start at top when opening a project page
+    window.scrollTo(0, 0);
+  }, []);
 
   if (!project) {
     return (
@@ -471,7 +460,12 @@ export default function App() {
   }, [theme]);
 
   // Sync with system when there is no manual override
-  useSystemThemeSync(!override);
+  useEffect(() => {
+    if (override) return;
+    const mm = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)");
+    const initial = mm && mm.matches ? "dark" : "light";
+    document.documentElement.classList.toggle("dark", initial === "dark");
+  }, [override]);
 
   return (
     <HashRouter>
